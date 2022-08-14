@@ -1,0 +1,53 @@
+☺☻♥♦♣♠•◘○◙♂♀♪♫☼►◄↕‼¶§▬↨↑↓→←∟↔▲▼                                                        !"#$%&'()*.,-./01245689:;<=>?@ABCDEFGHI
+
+944░ ▒ ▓ │ ┤ ╡ ╢ ╖ ╕ ╣ ║ ╗ ╝ ╜ ╛ ┐ └ ┴ ┬ ├ ─ 965 ┼ ╞ ╟ ╚ ╔ ╩ ╦ ╠ ═ ╬ ╧ ╥ ╙ ╘ ╒ ╓ ╫ ╪ ┘ ┌ █ ▄ ▌ ▐ ▀ -991
+ 
+
+╒═══════════╕
+
+╘═══════════╛
+
+╔╦╗
+╠╬╣
+╚╩╝
+
+
+§c► 
+§r
+
+
+/script debugger connect localhost 1000
+
+59, ambient.beacon.activate, 60, 86, 110, 111, 135, 138, 309, 313, 321, 401, 435, 440, 756, 824, banjo - 828, 842, 845, 874, hurt - 898, 900, 904, 909, 924
+
+
+
+/*
+|--------------------------------------------------------------------------
+| Smelly API Import
+|--------------------------------------------------------------------------
+|
+| This one line imports all of SA from its plugin loader, utilities and 
+| another important scripts to make Smelly API run properly
+| Please do not remove or move this line anywhere in this file
+| 
+*/
+
+
+0  1  2  3  4  5  6  7  8  
+9  10 11 12 13 14 15 16 17
+18 19 20 21 22 23 24 25 25
+27 28 29 30 31 32 33 34 35
+36 37 38 39 40 41 42 43 44
+45 46 47 48 49 50 51 52 53
+
+
+
+
+
+
+{"item_lock":{"mode":"lock_in_slot"}}
+
+{"item_lock":{"mode":"lock_in_inventory"}}
+
+{"minecraft:can_destroy":{"blocks":["grass"]}}

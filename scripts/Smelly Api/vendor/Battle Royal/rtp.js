@@ -1,0 +1,98 @@
+import {
+  BlockRaycastOptions,
+  Location,
+  MinecraftEffectTypes,
+  Player,
+  Vector,
+  world,
+} from "mojang-minecraft";
+import { SA } from "../../index.js";
+import { rd } from "../Airdrops/index.js";
+
+function isNear(x, xx, z, zz) {
+  if (Math.max(x, xx) - Math.min(xx, x) < 10) return true;
+  if (Math.max(z, zz) - Math.min(z, zz) < 10) return true;
+  return false;
+}
+/**
+ *
+ * @param {Player} player
+ * @param {Number} x
+ * @param {Number} y
+ * @param {Number} rad
+ */
+export function rtp(player, xx, zz, maxrad, minrad, otherposes) {
+  let y,
+    x,
+    z,
+    C = 0,
+    r,
+    mr,
+    xxx,
+    zzz,
+    ttt,
+    ooo;
+  if (maxrad >= minrad) {
+    (r = maxrad), (mr = minrad);
+  } else {
+    (r = minrad), (mr = maxrad);
+  }
+  xxx = xx + r;
+  zzz = zz + r;
+  ttt = zz - r;
+  ooo = xx - r;
+  SA.Build.chat.broadcast(
+    "x: " +
+      xxx +
+      " z: " +
+      zzz +
+      " -x: " +
+      ooo +
+      " -z: " +
+      ttt +
+      " o: " +
+      SA.Utilities.format.stringifyEx(otherposes, " ")
+  );
+  while (!y && C < 300) {
+    C++;
+    x = rd(xx + r, xx + mr);
+    z = rd(zz + r, zz + mr);
+    if (Math.round(Math.random())) x = rd(xx - r, xx - mr);
+    if (Math.round(Math.random())) z = rd(zz - r, zz - mr);
+    let c = false;
+    if (otherposes && otherposes.length > 0)
+      for (const e of otherposes) {
+        if (isNear(x, e.x, z, e.z)) {
+          c = true;
+          SA.Build.chat.broadcast('§cNear, skip')
+          break;
+        }
+      }
+    if (c) continue;
+    const q = new BlockRaycastOptions();
+    (q.includeLiquidBlocks = false), (q.includePassableBlocks = false);
+    const b = world
+      .getDimension("overworld")
+      .getBlockFromRay(new Location(x, 320, z), new Vector(0, -220, 0));
+    if (b && b.location.y >= 63) {
+      y = b.location.y + 1;
+      break;
+    }
+  }
+  if (!y) {
+    SA.Build.chat.broadcast(
+      "§cНе удалось найти подходящее место на земле",
+      player.name
+    );
+    y = 100;
+    player.addEffect(MinecraftEffectTypes.slowFalling, 500, 1, false);
+  }
+  player.teleport(
+    new Location(x, y, z),
+    world.getDimension("overworld"),
+    0,
+    90,
+    false
+  );
+  return { x: x, y: y, z: z };
+}

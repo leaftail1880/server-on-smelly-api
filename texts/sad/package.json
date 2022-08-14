@@ -1,0 +1,29 @@
+{
+  "dependencies": {
+    "@types/mojang-gametest": "^0.1.4",
+    "@types/mojang-minecraft": "^0.1.6",
+    "@types/mojang-minecraft-ui": "^0.1.0"
+  },
+  "name": "smelly-api",
+  "description": "A Minecraft Bedrock Gametest Framework",
+  "version": "3.0.0",
+  "main": "scripts/index.js",
+  "scripts": {
+    "compile": "node build/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/smell-of-curry/Smelly-API.git"
+  },
+  "keywords": [
+    "minecraft",
+    "bedrock",
+    "gametest"
+  ],
+  "author": "Smell of curry",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/smell-of-curry/Smelly-API/issues"
+  },
+  "homepage": "https://github.com/smell-of-curry/Smelly-API#readme"
+}

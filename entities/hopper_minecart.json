@@ -1,0 +1,64 @@
+{
+  "format_version": "1.17.0",
+  "minecraft:entity": {
+    "description": {
+      "identifier": "t:hpper_minecart",
+      "is_spawnable": false,
+      "is_summonable": true,
+      "is_experimental": false
+    },
+    "component_groups": {
+      "active": {
+        "minecraft:item_hopper": {}
+      }
+    },
+    "components": {
+      "minecraft:inventory": {
+        "container_type": "inventory",
+        "inventory_size": 54
+      },
+      "minecraft:nameable": {
+        "allow_name_tag_renaming": true,
+        "always_show": true
+      },
+      "minecraft:type_family": {
+        "family": [ "minecart", "inanimate" ]
+      },
+      "minecraft:collision_box": {
+        "width": 0.98,
+        "height": 0.7
+      },
+      "minecraft:health": {
+        "value": 1,
+        "max": 1
+      },
+      "minecraft:is_stackable": {
+      },
+	    "minecraft:physics": {
+      },
+      "minecraft:pushable": {
+        "is_pushable": false,
+        "is_pushable_by_piston": false
+      },
+      "minecraft:on_death": {
+        "event": "ded"
+      }
+    },
+    "events": {
+      "minecraft:entity_spawned": {
+        "add": {
+          "component_groups": [
+            "active"
+          ]
+        }
+      },
+      "ded": {
+        "remove": {
+          "component_groups": [
+            "active"
+          ]
+        }
+      }
+    }
+  }
+}
