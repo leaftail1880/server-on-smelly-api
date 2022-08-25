@@ -108,14 +108,25 @@ export let WORLDOPTIONS = [];
 export const db = new ScoreboardDatabase("world");
 
 export class wow {
+  /**
+   * 
+   * @param {String} name 
+   * @param {String} displayName 
+   */
   constructor(name, displayName) {
-    //if (displayName.length > 32) return new Error(displayName + ' > 32')
+   let a = displayName||name
+    if (a.length > 16) a = a.substring(0, 16)
+    this.name = name;
+    this.displayName = a
     try {
       world
         .getDimension("overworld")
-        .runCommand(`scoreboard objectives add ${name} dummy "${displayName}"`);
-    } catch (e) {}
-    this.name = name;
+        .runCommand(`scoreboard objectives add ${name} dummy "${a}"`);
+    } catch (e) {
+      const er = JSON.parse(e)
+      if (er.statusMessage.startsWith('§cЦель ')) return
+      world.getDimension('overworld').runCommand('say §c[Error] ' + er.statusMessage + ' ' + a.length)
+    }
   }
   set(option, value) {
     world

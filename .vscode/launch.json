@@ -8,15 +8,6 @@
       "type": "node-terminal"
     },
     {
-      "name": "Attach",
-      "port": 9229,
-      "request": "attach",
-      "skipFiles": [
-        "<node_internals>/**"
-      ],
-      "type": "node"
-    },
-    {
       "type": "minecraft-js",
       "request": "attach",
       "name": "/script debugger connect localhost 1000",

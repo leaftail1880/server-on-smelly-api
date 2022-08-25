@@ -19,6 +19,7 @@ import { parseLocationAugs } from "../../app/Utilities/formatter.js";
 import { SA } from "../../index.js";
 import { rd } from "../Airdrops/index.js";
 import { quene } from "../Battle Royal/index.js";
+import { stats } from "../Private/private.js";
 import { globalRadius } from "../Server/index.js";
 
 new WorldOption(
@@ -220,10 +221,12 @@ world.events.beforeDataDrivenEntityTriggerEvent.subscribe((data) => {
   if (
     data.id != "binocraft:on_death" ||
     SA.Build.entity.getScore(data.entity, objectives[0]) != invs.anarch ||
-    data.entity.hasTag("saving") ||
-    data.entity.hasTag("br:alive")
+    data.entity.hasTag("saving")
   )
     return;
+  stats.deaths.Eadd(data.entity, 1)
+  if (
+    data.entity.hasTag("br:alive")) return
   data.cancel = true;
   const ent = data.entity.dimension.spawnEntity(
     "t:hpper_minecart",

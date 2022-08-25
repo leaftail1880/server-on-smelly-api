@@ -27,6 +27,7 @@ import {
 import { SA } from "../../../../../index.js";
 import { LeaderboardBuild } from "../../../../Leaderboards/build/LeaderboardBuilder.js";
 import { Atp } from "../../../../Portals/index.js";
+import { stats } from "../../../../Private/private.js";
 import {
   Allhrs,
   Allmin,
@@ -535,14 +536,15 @@ export const ACTIONS1 = {
         .getClosetsEntitys(his.player, 10, "f:t", 44, false)
         .find(
           (e) =>
-            e.nameTag == item.name.replace("§m§n§m§r", "").replace("§m§n§m§r", "")
+            e.nameTag ==
+            item.name.replace("§m§n§m§r", "").replace("§m§n§m§r", "")
         );
       if (!data.formValues[0]) {
         LeaderboardBuild.removeObj(
           SA.Build.entity.getTagStartsWith(ent, "obj:")
         );
         ent.triggerEvent("kill");
-        return
+        return;
       }
       LeaderboardBuild.shangeStyle(
         SA.Build.entity.getTagStartsWith(ent, "obj:"),
@@ -657,15 +659,29 @@ export const ACTIONS1 = {
     form.title("§l§fСтатистика " + his.player.name + "§r");
     form.button("Закрыть");
     form.body(
-      `Время всего: ${Allhrs.Eget(his.player)}:${Allmin.Eget(
-        his.player
-      )}:${Allsec.Eget(his.player)}\nВремя за сеанс: ${Seahrs.Eget(
-        his.player
-      )}:${Seamin.Eget(his.player)}:${Seasec.Eget(
-        his.player
-      )}\nВремя за день: ${Dayhrs.Eget(his.player)}:${Daymin.Eget(
-        his.player
-      )}:${Daysec.Eget(his.player)}${"\n\n\n\n"}`
+      // `Время всего: ${}:${}:${}\nВремя за на анархии: ${}:${Seamin.Eget(his.player)}:${Seasec.Eget(
+      //   his.player
+      // )}\nВремя за день: ${Dayhrs.Eget(his.player)}:${Daymin.Eget(
+      //   his.player
+      // )}:${Daysec.Eget(his.player)}${"\n\n\n\n"}`
+      SA.Lang.lang.stats(
+        Allhrs.Eget(his.player),
+        Allmin.Eget(his.player),
+        Allsec.Eget(his.player),
+        Seahrs.Eget(his.player),
+        Seamin.Eget(his.player),
+        Seasec.Eget(his.player),
+        Dayhrs.Eget(his.player),
+        Daymin.Eget(his.player),
+        Daysec.Eget(his.player),
+        stats.kills.Eget(his.player),
+        stats.deaths.Eget(his.player),
+        stats.Hget.Eget(his.player),
+        stats.Hgive.Eget(his.player),
+        stats.Bplace.Eget(his.player),
+        stats.Bbreak.Eget(his.player),
+        stats.FVlaunc.Eget(his.player),
+      )
     );
     OpenForm(his, his.player, form);
   },
@@ -822,7 +838,7 @@ export class ChestGUI {
           this.mapInventory
         );
         if (change == null) return;
-        this.onSlotChange(change, change.ex ? change.item.amount : '');
+        this.onSlotChange(change, change.ex ? change.item.amount : "");
       }),
       playerLeave: world.events.playerLeave.subscribe(({ playerName }) => {
         if (playerName != this.player.name) return;
@@ -878,9 +894,10 @@ export class ChestGUI {
       delete CURRENT_GUIS[this.player.name];
       delete PAGES["forplayer:" + this.player.name];
       delete PAGES["forrplayer:" + this.player.name];
-      const k  = Object.keys(PAGES).find(e=>e.endsWith("::dm::" + this.player.name));
-      if (k) 
-      delete PAGES[k];
+      const k = Object.keys(PAGES).find((e) =>
+        e.endsWith("::dm::" + this.player.name)
+      );
+      if (k) delete PAGES[k];
       try {
         this.entity.triggerEvent("despawn");
         suc = true;

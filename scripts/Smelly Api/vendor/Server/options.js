@@ -128,9 +128,9 @@ if (wo.Q("server:spawn")) {
 
   world.events.playerJoin.subscribe((PlayerJoinEvent) => {
     const pl = PlayerJoinEvent.player;
-    pl.removeTag("WSeenJoinMessage");
+    if (SA.Build.entity.getScore(pl, 'pvp') == 0) pl.removeTag("WSeenJoinMessage");
     SA.Build.entity.removeTagsStartsWith(pl, "joinedAt:");
-    if (!po.Q("title:join:disable", pl))
+    if (!po.Q("title:join:disable", pl) && SA.Build.entity.getScore(pl, 'pvp') == 0)
       pl.addTag(
         "joinedAt:" + pl.location.x + " " + pl.location.y + " " + pl.location.z
       );
