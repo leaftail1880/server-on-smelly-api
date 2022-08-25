@@ -10,6 +10,8 @@ import {
   MinecraftBlockTypes,
   ItemStack,
   MinecraftItemTypes,
+  BlockRaycastOptions,
+  Vector,
   BlockType,
 } from "mojang-minecraft";
 import { po, wo, WorldOption } from "../../app/Models/Options.js";
@@ -461,7 +463,7 @@ SA.Utilities.time.setTickInterval(() => {
   }
   for (const obj of objectives)
     SA.Build.chat.runCommand(`scoreboard objectives add ${obj} dummy`);
-}, 0);
+}, 0, 'portals');
 
 world.events.beforeDataDrivenEntityTriggerEvent.subscribe((data) => {
   if (data.id != "portal") return;

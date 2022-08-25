@@ -205,7 +205,7 @@ SA.Utilities.time.setTickInterval(() => {
       break;
     }
   }
-});
+}, 0, 'airdropes');
 
 const kit = new SA.Command(
   {

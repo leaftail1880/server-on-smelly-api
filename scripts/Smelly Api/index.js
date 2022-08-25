@@ -21,9 +21,9 @@ import { DynamicPropertysDatabase } from "./database/types/DynamicPropertys.js";
 import { ItemDatabase } from "./database/types/Item.js";
 import { ScoreboardDatabase } from "./database/types/Scoreboard.js";
 import { emoji } from "./lang/emoji.js";
+import { parse } from "./lang/parser.js";
 import { profanity } from "./lang/profanirty.js";
 import { text } from "./lang/text.js";
-import { plgs } from "./vendor/autoload.js";
 
 /**
  * Smelly API
@@ -49,6 +49,7 @@ export class SA {
     lang: text,
     emoji: emoji,
     profanity: profanity,
+    parse: parse,
   };
   static Exceptions = {
     return: Return,
@@ -135,4 +136,9 @@ world.events.worldInitialize.subscribe(({ propertyRegistry }) => {
   });
 });
 
-world.events.beforeChat
+try {
+  world.events.beforeWatchdogTerminate.subscribe((data) => {
+    data.cancel = true;
+    SA.Build.chat.broadcast("емае скрипт крашнулся");
+  });
+} catch (error) {}

@@ -1,0 +1,14 @@
+{
+  "name": "vpt",
+  "version": "1.0.0",
+  "main": "test.js",
+  "scripts": {
+    "start": "node test.js",
+    "dev": "nodemon test.js"
+    },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "description": ""
+}

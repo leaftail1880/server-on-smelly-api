@@ -25,8 +25,8 @@ export function setTickTimeout(callback, tick) {
  * @param {number} tick
  * @returns {number}
  */
-export function setTickInterval(callback, tick) {
-  return new Timeout(callback, tick, true);
+export function setTickInterval(callback, tick, msg) {
+  return new Timeout(callback, tick, true, Date.now(), msg);
 }
 
 /**
@@ -43,28 +43,41 @@ export function clearTickInterval(callback) {
  */
 const TIMEOUTS = new Map();
 
+
+let dev = false
+
+
 class Timeout {
   /**
    * Register a timeout
    * @param {() => void} callback On timeout complete code to be executed
    * @param {number} tick tick of the timeout
    */
-  constructor(callback, tick, loop = false, id = Date.now()) {
+  constructor(callback, tick, loop = false, id = Date.now(), msg) {
     this.callbackTick = null;
     this.tickDelay = tick;
     this.loop = loop;
     this.callback = callback;
     this.id = id;
+    this.msg = msg
 
     TIMEOUTS.set(id, this);
 
     this.TickCallBack = world.events.tick.subscribe(({ currentTick }) => {
       if (!this.callbackTick) this.callbackTick = currentTick + this.tickDelay;
       if (this.callbackTick > currentTick) return;
+
+      const start = Date.now()
       this.callback(currentTick);
+      const time = Date.now() - start
+      if (time > 2 && dev) {
+        this.loop = false
+        console.warn(this.msg + ' ' + this.callback.toString().length + ' ' + time);
+      };
 
       if (!this.loop) return this.expire();
       this.callbackTick = currentTick + this.tickDelay;
+      
     });
   }
 

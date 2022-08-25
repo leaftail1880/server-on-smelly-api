@@ -124,7 +124,7 @@ SA.Utilities.time.setTickInterval(() => {
       if (a) a.playSound("note.bass");
     });
   }
-}, 20);
+}, 20, 'br');
 
 const bbr = new SA.Command(
   { name: "br", description: "Телепортирует на спавн батл рояля" },

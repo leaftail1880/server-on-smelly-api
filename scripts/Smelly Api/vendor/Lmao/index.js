@@ -42,7 +42,7 @@ SA.Utilities.time.setTickInterval(() => {
       pl.onScreenDisplay.setActionBar(string ?? " ");
     }
   }
-}, 0);
+}, 0, 'lmao');
 
 
 // SA.Utilities.time.setTickInterval(() => {

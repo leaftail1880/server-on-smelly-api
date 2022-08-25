@@ -4,18 +4,25 @@ import {
   Entity,
   EntityQueryOptions,
   InventoryComponentContainer,
-  ItemStack, MinecraftEnchantmentTypes,
+  ItemStack,
+  MinecraftEnchantmentTypes,
   MinecraftItemTypes,
-  Player, world
+  Player,
+  world,
 } from "mojang-minecraft";
 import {
-  ActionFormData, ModalFormData, ModalFormResponse, MessageFormData, MessageFormResponse
+  ActionFormData,
+  ModalFormData,
+  ModalFormResponse,
+  MessageFormData,
+  MessageFormResponse,
 } from "mojang-minecraft-ui";
 import {
   light_db,
   OPTIONS,
   po,
-  wo, WORLDOPTIONS
+  wo,
+  WORLDOPTIONS,
 } from "../../../../../app/Models/Options.js";
 import { SA } from "../../../../../index.js";
 import { LeaderboardBuild } from "../../../../Leaderboards/build/LeaderboardBuilder.js";
@@ -23,27 +30,32 @@ import { Atp } from "../../../../Portals/index.js";
 import {
   Allhrs,
   Allmin,
-  Allsec, Dayhrs,
+  Allsec,
+  Dayhrs,
   Daymin,
-  Daysec, Seahrs,
+  Daysec,
+  Seahrs,
   Seamin,
-  Seasec
+  Seasec,
 } from "../../../../Server/index.js";
+import { Wallet } from "../../../../Wallet/money.js";
 import { ENTITY_INVENTORY, GUI_ITEM, GUI_ITEM2 } from "../../config.js";
 import {
   auxa,
   DEFAULT_STATIC_PAGE_ID,
   DEFAULT_STATIC_PAGE_ID2,
   pls,
-  предметы
+  предметы,
 } from "../../static_pages.js";
 import {
   ChangeAction,
   ChangePAction,
   CloseAction,
   CommandAction,
-  GiveAction, OpenForm, PageAction,
-  SetAction
+  GiveAction,
+  OpenForm,
+  PageAction,
+  SetAction,
 } from "./ItemActions.js";
 import { getItemUid, Page, PAGES } from "./Page.js";
 
@@ -101,6 +113,83 @@ class DefaultFill {
     }
   }
 }
+
+/**
+ * Fills a entity with desired itmes
+ * @param {Entity} entity
+ * @param {Page} page page type to fill
+ */
+function ShopFill(entity, page, player) {
+  /**
+   * @type {InventoryComponentContainer}
+   */
+  const container = entity.getComponent("minecraft:inventory").container;
+  const id = page.id + "::dm::" + player.name;
+  let custom_page;
+  PAGES[id]
+    ? (custom_page = PAGES[id])
+    : (custom_page = new Page(id, 54, "shop"));
+  for (let i = 0; i < container.size; i++) {
+    /**
+     * @type {import("./Page").Item}
+     */
+    let item = custom_page?.items[i] ?? page?.items[i];
+    if (!item || !item.type) {
+      container.setItem(i, new ItemStack(MinecraftItemTypes.air));
+      continue;
+    }
+    if (item.lore[0] == SA.Lang.lang["shop.lore"]()[0]) {
+      const w = new Wallet(player);
+
+      item.lore = SA.Lang.lang["shop.lore"](
+        SA.Lang.parse(item.lore, "shop.lore").price,
+        w.balance()
+      );
+    }
+    entity.runCommand(
+      `replaceitem entity @s slot.inventory ${i} ${item?.type} ${item?.amount} ${item?.data}`
+    );
+    /**
+     * @type {ItemStack}
+     */
+    const chestItem = container.getItem(i);
+    if (item?.name) chestItem.nameTag = item.name;
+    if (item?.lore) chestItem.setLore(item.lore);
+    if (item?.components?.enchantments?.length > 0) {
+      const MinecraftEnchantments = Object.values(MinecraftEnchantmentTypes);
+      /**
+       * @type {EnchantmentList}
+       */
+      const ItemStackEnchantments =
+        chestItem.getComponent("enchantments").enchantments;
+      for (const ench of item.components.enchantments) {
+        ItemStackEnchantments.addEnchantment(
+          new Enchantment(
+            MinecraftEnchantments.find((type) => type.id == ench.id),
+            ench.level
+          )
+        );
+      }
+      chestItem.getComponent("enchantments").enchantments =
+        ItemStackEnchantments;
+    }
+    container.setItem(i, chestItem);
+    custom_page.createItem(
+      i,
+      item.type,
+      item?.amount,
+      item?.data,
+      item?.action,
+      item?.name,
+      item?.lore
+    );
+    if (i == 0) co("crItem: " + item.type);
+    //console.warn(iitem + ' ' + item.type)
+  }
+  co("Real type: " + custom_page.items[0].type);
+  return custom_page;
+}
+
 //Настройки игрока и новая система - заполнение массивом (модер меню)
 class SpecialFill {
   /**
@@ -226,7 +315,9 @@ class SpecialFill {
       if (i <= 44 && array[i]) {
         const ttype = Number(array[i].split("(::)")[0]);
         item = {};
-        item.name = array[i].startsWith('§m§n§m§r') ? array[i].split("(::)")[1] : '§m§n§m§r' + array[i].split("(::)")[1];
+        item.name = array[i].startsWith("§m§n§m§r")
+          ? array[i].split("(::)")[1]
+          : "§m§n§m§r" + array[i].split("(::)")[1];
         item.action = ttype == 2 ? item2ac : item1ac;
         item.amount = i + 1;
         item.data = 0;
@@ -428,6 +519,225 @@ class Itemss {
  */
 export const CURRENT_GUIS = {};
 
+export const ACTIONS1 = {
+  temp: (his, item) => {
+    console.warn("lol, temp runned");
+  },
+
+  give: (his, item) => GiveAction(his, item),
+  lbs: (his, item) => {
+    const form = new ModalFormData();
+    form.title("§l§fСтиль§r");
+    form.textField("Оставь пустым для удаления", "gray | orange | green", "");
+    OpenForm(his, his.player, form, (data) => {
+      if (data.isCanceled) return;
+      const ent = SA.Build.entity
+        .getClosetsEntitys(his.player, 10, "f:t", 44, false)
+        .find(
+          (e) =>
+            e.nameTag == item.name.replace("§m§n§m§r", "").replace("§m§n§m§r", "")
+        );
+      if (!data.formValues[0]) {
+        LeaderboardBuild.removeObj(
+          SA.Build.entity.getTagStartsWith(ent, "obj:")
+        );
+        ent.triggerEvent("kill");
+        return
+      }
+      LeaderboardBuild.shangeStyle(
+        SA.Build.entity.getTagStartsWith(ent, "obj:"),
+        data.formValues[0]
+      );
+    });
+  },
+  tag: (his, item) => {
+    his.player.removeTag(item.name.cc());
+  },
+  redo: (his, item) => {
+    const form = new ModalFormData();
+    form.title("§l§fРедактирование§r");
+    form.textField(
+      "Оставь пустым для удаления",
+      "Имя",
+      item.name.replace("§m§n§m§r§m§n§m§r", "")
+    );
+    OpenForm(his, his.player, form, (d) => {
+      /**
+       * @type {ModalFormResponse}
+       */
+      const data = d;
+      if (data.isCanceled) return;
+      const ent = SA.Build.entity
+        .getClosetsEntitys(his.player, 10, "f:t", 44, false)
+        .find((e) => e.nameTag.cc() == item.name.cc());
+      if (!data.formValues[0]) ent.triggerEvent("kill");
+      ent.nameTag = data.formValues[0];
+    });
+  },
+
+  "spawn:ft": (his, item) => {
+    const form = new ModalFormData();
+    form.title("§l§fЛетающий текст§r");
+    form.textField("Имя", "Оставь пустым для отмены", "§");
+    OpenForm(his, his.player, form, (data) => {
+      if (data.isCanceled || !data.formValues[0]) return;
+      const ent = his.player.dimension.spawnEntity(
+        "f:t",
+        SA.Build.entity.locationToBlockLocation(his.player.location)
+      );
+      ent.nameTag = data.formValues[0];
+    });
+  },
+  "spawn:lb": (his, item) => {
+    const form = new ModalFormData();
+    form.title("§l§fЛидерборд§r");
+    form.textField("Таблица счета", "Оставь пустым для отмены", "");
+    form.textField("Стиль", "gray | orange | green", "");
+    OpenForm(his, his.player, form, (data) => {
+      if (data.isCanceled || !data.formValues[0] || !data.formValues[1]) return;
+      const l = SA.Build.entity.locationToBlockLocation(his.player.location);
+      SA.Build.chat.broadcast(
+        LeaderboardBuild.createLeaderboard(
+          data.formValues[0],
+          l.x,
+          l.y,
+          l.z,
+          his.player.dimension.id,
+          data.formValues[1]
+        ),
+        his.player.name
+      );
+    });
+  },
+  close: (his, item) => {
+    CloseAction(his);
+  },
+  set: (his, item, change) => {
+    SetAction(his, item, change.slot, change.item);
+  },
+  change: (his, item, change) => {
+    ChangePAction(his, item, change.slot, his.player);
+  },
+  "sc:clear": (his, item, change) => {
+    for (const opt of OPTIONS) {
+      his.player.removeTag(opt.name);
+    }
+    let count = 0;
+    for (let item of his.mapInventory) {
+      let nei = {
+        lore: item.item.getLore(),
+        name: item.item.nameTag,
+      };
+      SetAction(
+        his,
+        nei,
+        count,
+        new ItemStack(
+          MinecraftItemTypes.redCandle,
+          item.item.amount,
+          item.item.data
+        )
+      );
+      PAGES[his.page.id].createItem(
+        count,
+        "minecraft:red_candle",
+        item.item.amount,
+        item.item.data,
+        "change",
+        item.item.nameTag,
+        item.item.getLore()
+      );
+      count++;
+      if (count >= OPTIONS.length) break;
+    }
+    SetAction(his, item, change.slot, change.item);
+  },
+  stats: (his, item) => {
+    const form = new ActionFormData();
+    form.title("§l§fСтатистика " + his.player.name + "§r");
+    form.button("Закрыть");
+    form.body(
+      `Время всего: ${Allhrs.Eget(his.player)}:${Allmin.Eget(
+        his.player
+      )}:${Allsec.Eget(his.player)}\nВремя за сеанс: ${Seahrs.Eget(
+        his.player
+      )}:${Seamin.Eget(his.player)}:${Seasec.Eget(
+        his.player
+      )}\nВремя за день: ${Dayhrs.Eget(his.player)}:${Daymin.Eget(
+        his.player
+      )}:${Daysec.Eget(his.player)}${"\n\n\n\n"}`
+    );
+    OpenForm(his, his.player, form);
+  },
+};
+
+const STARTACTIONS1 = {
+  "": (his, item) => {
+    console.warn("lol, empty runned");
+  },
+  /**
+   *
+   * @param {ChestGUI} his
+   * @param {import("./Page.js").Item} item
+   */
+  "buy:": (his, item) => {
+    const price = Number(item.action.split(":")[1]),
+      form = new MessageFormData(),
+      w = new Wallet(his.player);
+    if (w.balance() < price) {
+      SA.Build.chat.broadcast(
+        SA.Lang.lang["shop.notenought"](price, w.balance()),
+        his.player.name
+      );
+      his.player.playSound("note.bass");
+      his.setPage(his.page.id);
+      return;
+    }
+    form.title("§l§fПокупка§r");
+    form.body(
+      `  §7Вы уверены, что хотите купить §f${item.type.split(":")[1]} х${
+        item.amount
+      } §7за§6 ${price}?\n  §7Ваш баланс сейчас: §6${w.balance()}§7, после покупки на нем станет: §f${
+        w.balance() - price
+      }`
+    );
+    form.button1("Купить");
+    form.button2("§cОтмена§r");
+    OpenForm(his, his.player, form, (d) => {
+      /**
+       * @type {MessageFormResponse}
+       */
+      const data = d;
+      if (data.isCanceled || data.selection == 0) return;
+      if (w.balance() < price) {
+        SA.Build.chat.broadcast(
+          SA.Lang.lang["shop.notenought"](price, w.balance()),
+          his.player.name
+        );
+        his.player.playSound("note.bass");
+        return;
+      }
+      GiveAction(his, item);
+      w.add(-price);
+      SA.Build.chat.broadcast(
+        SA.Lang.lang["shop.suc"](
+          item.type.split(":")[1],
+          item.amount,
+          price,
+          w.balance()
+        ),
+        his.player.name
+      );
+      his.player.playSound("random.levelup");
+    });
+  },
+  "page:": (his, item) => PageAction(his, item),
+  "Atp:": (his, item, change) => {
+    SetAction(his, item, change.slot, change.item);
+    his.killa().then((e) => Atp(his.player, item.action.split(":")[1]));
+  },
+};
+
 export class ChestGUI {
   /**
    * Finds and returns a slot change in a inventory
@@ -438,6 +748,18 @@ export class ChestGUI {
   static getSlotChange(oldInv, newInv) {
     if (oldInv.length != newInv.length) return null;
     for (let i = 0; i < oldInv.length; i++) {
+      // if (
+      //   oldInv[i].uid != newInv[i].uid &&
+      //   oldInv[i].item.id == newInv[i].item.id &&
+      //   oldInv[i].item.nameTag == newInv[i].item.nameTag &&
+      //   oldInv[i].item.data == newInv[i].item.data &&
+      //   oldInv[i].item.getLore() == newInv[i].item.getLore()
+      // ) {
+      //   oldInv[i].item.amount = oldInv[i].item.amount - newInv[i].item.amount;
+      //   SA.Build.chat.broadcast('yaaaaaaaaaay')
+      //   return { slot: i, item: oldInv[i].item };
+      // }
+
       if (oldInv[i].uid != newInv[i].uid)
         return { slot: i, item: oldInv[i].item };
     }
@@ -557,6 +879,9 @@ export class ChestGUI {
       delete CURRENT_GUIS[this.player.name];
       delete PAGES["forplayer:" + this.player.name];
       delete PAGES["forrplayer:" + this.player.name];
+      const k  = Object.keys(PAGES).find(e=>e.endsWith("::dm::" + this.player.name));
+      if (k) 
+      delete PAGES[k];
       try {
         this.entity.triggerEvent("despawn");
         suc = true;
@@ -576,6 +901,7 @@ export class ChestGUI {
         world.events[key].unsubscribe(this.events[key]);
       }
       delete CURRENT_GUIS[this.player.name];
+      if (CURRENT_GUIS[this.player.name]) console.warn("wtf is going on");
       delete PAGES["forplayer:" + this.player.name];
       delete PAGES["forrplayer:" + this.player.name];
       try {
@@ -585,7 +911,7 @@ export class ChestGUI {
     } catch (error) {
       console.warn(error + error.stack);
     }
-    await SA.Utilities.time.sleep(7);
+    await SA.Utilities.time.sleep(10);
     return suc;
   }
   /**
@@ -607,7 +933,9 @@ export class ChestGUI {
     if (page.fillType == "spec") {
       page = SpecialFill.fill(this.entity, page, this.player);
     }
-
+    if (page.fillType == "shop") {
+      page = ShopFill(this.entity, page, this.player);
+    }
     if (page.fillType.startsWith("array:")) {
       if (page.fillType.split(":")[1] == "tags")
         page = SpecialFill.FillArray(
@@ -709,17 +1037,6 @@ export class ChestGUI {
         this.player.runCommand(
           `clear @s ${item.type} ${item.data} ${item.amount}`
         );
-        /**
-         * @type {PlayerInventoryComponentContainer}
-         */
-        // const inv = this.player.getComponent("minecraft:inventory").container
-        // console.warn(typeof inv)
-        // for (let i; i >= inv.size; i++) {
-        //   const it = inv.getItem(i)
-        //   if (it.id != item.type || it.getLore() != item.lore || it.data != item.data || it.nameTag != item.name ) continue
-        //   inv.setItem(i, new ItemStack(MinecraftItemTypes.air))
-        //   break
-        // }
       } catch (error) {
         // the item couldnt be cleared that means
         // they now have a item witch is really BAD
@@ -728,171 +1045,24 @@ export class ChestGUI {
         q.maxDistance = 2;
         [...this.player.dimension.getEntities(q)].forEach((e) => e.kill());
       }
-      if (item.action == "give") {
-        GiveAction.run(this, item);
-      } else if (item.action.startsWith("page:")) {
-        PageAction.run(this, item);
-      } else if (item.action == "lbs") {
-        const form = new ModalFormData();
-        form.title("§l§fСтиль§r");
-        form.textField(
-          "Оставь пустым для удаления",
-          "gray | orange | green",
-          ""
-        );
-        OpenForm.run(this, this.player, form, (data) => {
-          if (data.canceled) return;
-          const ent = SA.Build.entity
-            .getClosetsEntitys(this.player, 10, "f:t", 44, false)
-            .find(
-              (e) =>
-                e.nameTag ==
-                item.name.replace("§m§n§m", "").replace("§m§n§m§r", "")
-            );
-          if (!data.formValues[0]) {
-            LeaderboardBuild.removeObj(
-              SA.Build.entity.getTagStartsWith(ent, "obj:")
-            );
-            ent.triggerEvent("kill");
-          }
-          LeaderboardBuild.shangeStyle(
-            SA.Build.entity.getTagStartsWith(ent, "obj:"),
-            data.formValues[0]
-          );
-        });
-      } else if (item.action == "tag") {
-        this.player.removeTag(item.name.cc());
-      } else if (item.action == "redo") {
-        const form = new ModalFormData();
-        form.title("§l§fРедактирование§r");
-        form.textField(
-          "Оставь пустым для удаления",
-          "Имя",
-          item.name.replace("§m§n§m§r§m§n§m§r", "")
-        );
-        OpenForm.run(this, this.player, form, (d) => {
-          /**
-           * @type {ModalFormResponse}
-           */
-          const data = d
-          if (data.canceled) return;
-          const ent = SA.Build.entity
-            .getClosetsEntitys(this.player, 10, "f:t", 44, false)
-            .find((e) => e.nameTag.cc() == item.name.cc());
-          if (!data.formValues[0]) ent.triggerEvent("kill");
-          ent.nameTag = data.formValues[0];
-        });
-      } else if (item.action == "buy") {
-        
-        const form = new MessageFormData();
-        form.title("§l§fЛетающий текст§r");
-        form.button1('Купить')
-        form.button2('§cОтмена§r')
-        OpenForm.run(this, this.player, form, (d) => {
 
-          if (data.canceled|| !data.formValues[0]) return;
-          const ent = this.player.dimension.spawnEntity(
-            "f:t",
-            SA.Build.entity.locationToBlockLocation(this.player.location)
-          );
-          ent.nameTag = data.formValues[0];
-        });
-      } else if (item.action == "spawn:ft") {
-        const form = new ModalFormData();
-        form.title("§l§fЛетающий текст§r");
-        form.textField("Имя", "Оставь пустым для отмены", "§");
-        OpenForm.run(this, this.player, form, (data) => {
-          if (data.canceled|| !data.formValues[0]) return;
-          const ent = this.player.dimension.spawnEntity(
-            "f:t",
-            SA.Build.entity.locationToBlockLocation(this.player.location)
-          );
-          ent.nameTag = data.formValues[0];
-        });
-      } else if (item.action == "spawn:lb") {
-        const form = new ModalFormData();
-        form.title("§l§fЛидерборд§r");
-        form.textField("Таблица счета", "Оставь пустым для отмены", "");
-        form.textField("Стиль", "gray | orange | green", "");
-        OpenForm.run(this, this.player, form, (data) => {
-          if (data.canceled|| !data.formValues[0] || !data.formValues[1])
-            return;
-          const l = SA.Build.entity.locationToBlockLocation(
-            this.player.location
-          );
+      // Действия
+
+      let act = (his, item) =>
           SA.Build.chat.broadcast(
-            LeaderboardBuild.createLeaderboard(
-              data.formValues[0],
-              l.x,
-              l.y,
-              l.z,
-              this.player.dimension.id,
-              data.formValues[1]
-            ),
-            this.player.name
-          );
-        });
-      } else if (item.action.startsWith("command:")) {
-        CommandAction.run(this, item);
-      } else if (item.action == "close") {
-        CloseAction.run(this);
-      } else if (item.action == "set") {
-        SetAction.run(this, item, change.slot, change.item);
-      } else if (item.action.startsWith("Atp:")) {
-        SetAction.run(this, item, change.slot, change.item);
-        this.killa().then((e) => Atp(this.player, item.action.split(":")[1]));
-      } else if (item.action == "change") {
-        ChangePAction.run(this, item, change.slot, this.player);
-      } else if (item.action == "sc:clear") {
-        for (const opt of OPTIONS) {
-          this.player.removeTag(opt.name);
-        }
-        let count = 0;
-        for (let item of this.mapInventory) {
-          let nei = {
-            lore: item.item.getLore(),
-            name: item.item.nameTag,
-          };
-          SetAction.run(
-            this,
-            nei,
-            count,
-            new ItemStack(
-              MinecraftItemTypes.redCandle,
-              item.item.amount,
-              item.item.data
-            )
-          );
-          PAGES[this.page.id].createItem(
-            count,
-            "minecraft:red_candle",
-            item.item.amount,
-            item.item.data,
-            "change",
-            item.item.nameTag,
-            item.item.getLore()
-          );
-          count++;
-          if (count >= OPTIONS.length) break;
-        }
-        SetAction.run(this, item, change.slot, change.item);
-      } else if (item.action == "stats") {
-        const form = new ActionFormData();
-        form.title("§l§fСтатистика " + this.player.name + "§r");
-        form.button("Закрыть");
-        form.body(
-          `Время всего: ${Allhrs.Eget(this.player)}:${Allmin.Eget(
-            this.player
-          )}:${Allsec.Eget(this.player)}\nВремя за сеанс: ${Seahrs.Eget(
-            this.player
-          )}:${Seamin.Eget(this.player)}:${Seasec.Eget(
-            this.player
-          )}\nВремя за день: ${Dayhrs.Eget(this.player)}:${Daymin.Eget(
-            this.player
-          )}:${Daysec.Eget(this.player)}${"\n\n\n\n"}`
-        );
-        OpenForm.run(this, this.player, form);
+            "§c[ChestGUI] §fUnknown action: §r" + item.action
+          ),
+        ks = Object.keys(STARTACTIONS1),
+        res;
+      //const res = ks.find((e) => item.action.startsWith(e));
+      for (const e of ks) {
+        const q = item.action.startsWith(e);
+        if (!q) continue;
+        res = e;
       }
+      if (ACTIONS1[item.action]) act = ACTIONS1[item.action];
+      if (res) act = STARTACTIONS1[res];
+      act(this, item, change);
     }
 
     this.previousMap = this.mapInventory;
@@ -1115,9 +1285,9 @@ export class ChestGUI2 {
   runItemAction(item, slot, itemStack) {
     if (item.action == "give") {
       console.warn("give");
-      GiveAction.run(this, item);
+      GiveAction(this, item);
     } else if (item.action.startsWith("page:")) {
-      PageAction.run(this, item);
+      PageAction(this, item);
     } else if (item.action == "give2") {
       console.warn("give2");
       const form = new ActionFormData();
@@ -1125,15 +1295,15 @@ export class ChestGUI2 {
       form.button("Оставить");
       form.body("Удалить предмет из базы данных после сбора?");
       form.title("Ответь");
-      OpenForm.run(this, this.player, form, (res) => {
-        if (!res.canceled) {
+      OpenForm(this, this.player, form, (res) => {
+        if (!res.isCanceled) {
           console.warn(res.formValues[0]);
         }
       });
     } else if (item.action.startsWith("command:")) {
-      CommandAction.run(this, item);
+      CommandAction(this, item);
     } else if (item.action == "close") {
-      CloseAction.run(this);
+      CloseAction(this);
     } else if (item.action == "open") {
       const form = new ModalFormData();
       form.title("§l§f" + SA.Utilities.format.clearColors(item.name) + "§r");
@@ -1144,8 +1314,8 @@ export class ChestGUI2 {
           ? wo.Q(SA.Utilities.format.clearColors(item.name))
           : undefined
       );
-      OpenForm.run(this, this.player, form, (res) => {
-        if (!res.canceled) {
+      OpenForm(this, this.player, form, (res) => {
+        if (!res.isCanceled) {
           wo.set(SA.Utilities.format.clearColors(item.name), res.formValues[0]);
           SA.Build.chat.broadcast(res.formValues[0]);
         }
@@ -1166,8 +1336,8 @@ export class ChestGUI2 {
           "perm"
         )
       );
-      OpenForm.run(this, this.player, form, (res) => {
-        if (!res.canceled) {
+      OpenForm(this, this.player, form, (res) => {
+        if (!res.isCanceled) {
           switch (res.formValues[0]) {
             case 0:
               /**
@@ -1239,9 +1409,9 @@ export class ChestGUI2 {
         SA.Build.chat.broadcast(res.formValues);
       });
     } else if (item.action == "set") {
-      SetAction.run(this, item, slot, itemStack);
+      SetAction(this, item, slot, itemStack);
     } else if (item.action.startsWith("change")) {
-      ChangeAction.run(this, item, slot);
+      ChangeAction(this, item, slot);
     } else if (item.action.startsWith("sc:")) {
       let a = item.action.split(":")[1];
       if (a == "clear") {
@@ -1257,7 +1427,7 @@ export class ChestGUI2 {
             lore: item.item.getLore(),
             name: item.item.nameTag,
           };
-          SetAction.run(
+          SetAction(
             this,
             nei,
             count,
@@ -1281,7 +1451,7 @@ export class ChestGUI2 {
         }
       }
       if (a == "clear0") light_db.reset0();
-      SetAction.run(this, item, slot, itemStack);
+      SetAction(this, item, slot, itemStack);
     }
   }
 }

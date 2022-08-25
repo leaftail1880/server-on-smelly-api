@@ -290,7 +290,7 @@ SA.Utilities.time.setTickInterval(() => {
       );
       SA.Build.entity.despawn(ent);
     } catch (e) {}
-});
+}, 0, 'server0');
 
 /*
 |--------------------------------------------------------------------------
@@ -315,7 +315,8 @@ SA.Utilities.time.setTickInterval(() => {
       if (
         item &&
         (item?.nameTag?.startsWith("§r§m§n§m") ||
-          item?.nameTag?.startsWith("§m§n§m"))
+          item?.nameTag?.startsWith("§m§n§m") ||
+          item?.getLore()[item?.getLore().length]?.endsWith('}'))
       ) {
         const item2 = new ItemStack(Items.get(item.id), item.amount, item.data);
         inv.setItem(i, item2);
@@ -495,7 +496,7 @@ SA.Utilities.time.setTickInterval(() => {
       `deop "${v}"`,
     ]);
   }
-}, 10);
+}, 10, 'server10');
 
 /*
 |--------------------------------------------------------------------------
@@ -646,7 +647,7 @@ SA.Utilities.time.setTickInterval(() => {
       );
     } catch (e) {}
   }
-}, 20);
+}, 20, 'server20');
 
 /*
 |--------------------------------------------------------------------------

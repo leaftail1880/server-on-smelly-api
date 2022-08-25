@@ -26,4 +26,4 @@ SA.Utilities.time.setTickInterval(() => {
   } catch (error) {
     //console.warn(`${error} : ${error.stack}`);
   }
-});
+}, 'lb');

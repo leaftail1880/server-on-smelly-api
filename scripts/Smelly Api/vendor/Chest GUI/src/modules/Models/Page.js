@@ -149,8 +149,7 @@ export class Page {
     } else {
       const item = new ItemStack(Items.get(id.includes(':') ? id : 'minecraft:' + id), amount, data);
       if (name) item.nameTag = '§m§n§m§r' + name 
-      let lore2 = lore
-      if (lore) item.setLore(lore2)
+      if (lore) item.setLore(lore)
       Iitem = Page.itemStackToItem(item, action);
     }
     this.setItem(Iitem, slot);

@@ -5,7 +5,7 @@ import { Page } from "./modules/Models/Page.js";
 /**
  * @param {String} string
  */
- function perenos(string) {
+function perenos(string) {
   let count = 0;
   let maxC = 20;
   let output;
@@ -42,6 +42,118 @@ const default_item = "minecraft:sculk_vein";
 // 36 37 38 39 40 41 42 43 44
 // 45 46 47 48 49 50 51 52 53
 
+/**================================================================================================
+ * *                                    Магаз
+ *================================================================================================**/
+let items = [
+    {
+      id: "minecraft:arrow",
+      amount: 1,
+      price: 1,
+      data: 0,
+      //name: ''
+    },
+    {
+      id: "minecraft:carrot",
+      amount: 64,
+      price: 5,
+      data: 0,
+      //name: ''
+    },
+    {
+      id: "minecraft:carrot",
+      amount: 64,
+      price: 5,
+      data: 0,
+      //name: ''
+    },
+    {
+      id: "minecraft:carrot",
+      amount: 64,
+      price: 5,
+      data: 0,
+      //name: ''
+    },
+    {
+      id: "minecraft:carrot",
+      amount: 64,
+      price: 5,
+      data: 0,
+      //name: ''
+    },
+    {
+      id: "minecraft:carrot",
+      amount: 64,
+      price: 5,
+      data: 0,
+      //name: ''
+    },
+    {
+      id: "minecraft:carrot",
+      amount: 64,
+      price: 5,
+      data: 0,
+      //name: ''
+    },
+    {
+      id: "minecraft:carrot",
+      amount: 64,
+      price: 5,
+      data: 0,
+      //name: ''
+    },
+  ],
+  iPerPage = 2;
+items.fill(
+  {
+    id: "minecraft:carrot",
+    amount: 64,
+    price: 5,
+    data: 0,
+    //name: ''
+  },
+  2,
+  54
+);
+
+/**
+ * @type {Array<Page>}
+ */
+export let shopPages = [];
+
+for (let o = 1; o <= items.length / iPerPage; o++) {
+  const pa = new Page(`shop${o}`, 54, "shop")
+    .createItem(45, default_item, 1, 0, "set", " ")
+    .createItem(46, default_item, 1, 0, "set", " ")
+    .createItem(47, default_item, 1, 0, "set", " ")
+    .createItem(48, default_item, 1, 0, "set", " ")
+    .createItem(49, "minecraft:barrier", o, 0, "close", "§rЗакрыть")
+    .createItem(50, default_item, 1, 0, "set", " ")
+    .createItem(51, default_item, 1, 0, "set", " ")
+    .createItem(52, default_item, 1, 0, "set", " ")
+    .createItem(53, default_item, 1, 0, "set", " ");
+  if (o - 1 > 0)
+    pa.createItem(48, "minecraft:arrow", 1, 0, `page:shop${o - 1}`, "§rНазад");
+  if (o + 1 <= items.length / iPerPage)
+    pa.createItem(50, "minecraft:arrow", 1, 0, `page:shop${o + 1}`, "§rВперед");
+  let e, start = o * iPerPage - iPerPage, end = o * iPerPage;
+  items.length > iPerPage
+    ? (e = items.slice(start, end))
+    : (e = items);
+  for (const [i, p] of e.entries()) {
+    pa.createItem(
+      i,
+      p.id,
+      p.amount,
+      p.data,
+      "buy:" + p.price,
+      p.name,
+      SA.Lang.lang["shop.lore"](p.price, 0)
+    );
+  }
+  shopPages.push(pa);
+}
+console.log('nonr');
 
 /**================================================================================================
  **                                         Общедоступное меню
@@ -107,68 +219,81 @@ if (wo.Q("timer:enable"))
     "",
     "§r§7Открывает меню\nсо статистикой",
   ]);
-  
+
 export let lich = new Page(`lich`, 54, "spec")
-.createItem(45, default_item, 1, 0, "set", " ")
-.createItem(46, default_item, 1, 0, "set", " ")
-.createItem(47, default_item, 1, 0, "set", " ")
-.createItem(51, default_item, 1, 0, "set", " ")
-.createItem(52, default_item, 1, 0, "set", " ")
-.createItem(53, default_item, 1, 0, "set", " ")
-.createItem(
-  48,
-  "minecraft:coral",
-  1,
-  3,
-  "sc:clear",
-  "§r§lВосстановить по умолчанию",
-  ["", "§r§7Очищает все настройки"]
-)
-.createItem(49, "minecraft:barrier", 1, 0, "close", "§rЗакрыть")
-.createItem(50, "minecraft:ender_eye", 1, 0, "page:set", "§r§lНазад");
-SA.Utilities.time.setTickTimeout(() => {
-let ind = 0;
-for (let s of OPTIONS) {
-  lich.createItem(
-    ind,
-    `minecraft:white_candle`,
+  .createItem(45, default_item, 1, 0, "set", " ")
+  .createItem(46, default_item, 1, 0, "set", " ")
+  .createItem(47, default_item, 1, 0, "set", " ")
+  .createItem(51, default_item, 1, 0, "set", " ")
+  .createItem(52, default_item, 1, 0, "set", " ")
+  .createItem(53, default_item, 1, 0, "set", " ")
+  .createItem(
+    48,
+    "minecraft:coral",
     1,
-    0,
-    "change",
-    "§r" + s.name,
-    ["\n§r§7" + perenos(s.desc)]
-  );
-  ind++;
-}
+    3,
+    "sc:clear",
+    "§r§lВосстановить по умолчанию",
+    ["", "§r§7Очищает все настройки"]
+  )
+  .createItem(49, "minecraft:barrier", 1, 0, "close", "§rЗакрыть")
+  .createItem(50, "minecraft:ender_eye", 1, 0, "page:set", "§r§lНазад");
+SA.Utilities.time.setTickTimeout(() => {
+  let ind = 0;
+  for (let s of OPTIONS) {
+    lich.createItem(
+      ind,
+      `minecraft:white_candle`,
+      1,
+      0,
+      "change",
+      "§r" + s.name,
+      ["\n§r§7" + perenos(s.desc)]
+    );
+    ind++;
+  }
 }, 10);
 
 /*================================================================================================*/
 
-
 /**================================================================================================
  **                                     Меню модеров
  *================================================================================================**/
-new Page('moder_menu', 54, 'default')
-.createItem(10, 'minecraft:name_tag', 1, 0, 'page:tags', '§rТэги', ['', '§7§rОткрывает меню с тэгами'])
-.createItem(12, 'minecraft:writable_book', 1, 0, 'page:text', '§rТекст', ['', '§7§rОткрывает меню летающего текста'])
-.createItem(14, 'minecraft:gold_block', 1, 0, 'page:lbs', '§r§6Таблица лидеров', ['', '§7§rОткрывает меню таблицы лидеров'])
-.createItem(16, 'minecraft:skull', 1, 3, 'set', '§r§6Меню игроков', ['', '§7§rОткрывает меню игроков'])
-.createItem(40, "minecraft:barrier", 1, 0, "close", "§rЗакрыть GUI");
-new Page('tags', 54, 'array:tags')
-.createItem(48, "minecraft:barrier", 1, 0, "close", "§rЗакрыть")
-.createItem(50, "minecraft:ender_eye", 1, 0, "page:moder_menu", "§r§lНазад");
-new Page('text', 54, 'array:text')
-.createItem(48, "minecraft:barrier", 1, 0, "close", "§rЗакрыть")
-.createItem(49, "minecraft:kelp", 1, 0, "spawn:ft", "§rСоздать текст")
-.createItem(50, "minecraft:ender_eye", 1, 0, "page:moder_menu", "§r§lНазад");
-new Page('lbs', 54, 'array:lbs')
-.createItem(48, "minecraft:barrier", 1, 0, "close", "§rЗакрыть")
-.createItem(49, "minecraft:kelp", 1, 0, "spawn:lb", "§rСоздать таблицу")
-.createItem(50, "minecraft:ender_eye", 1, 0, "page:moder_menu", "§r§lНазад");
+new Page("moder_menu", 54, "default")
+  .createItem(10, "minecraft:name_tag", 1, 0, "page:tags", "§rТэги", [
+    "",
+    "§7§rОткрывает меню с тэгами",
+  ])
+  .createItem(12, "minecraft:writable_book", 1, 0, "page:text", "§rТекст", [
+    "",
+    "§7§rОткрывает меню летающего текста",
+  ])
+  .createItem(
+    14,
+    "minecraft:gold_block",
+    1,
+    0,
+    "page:lbs",
+    "§r§6Таблица лидеров",
+    ["", "§7§rОткрывает меню таблицы лидеров"]
+  )
+  .createItem(16, "minecraft:skull", 1, 3, "set", "§r§6Меню игроков", [
+    "",
+    "§7§rОткрывает меню игроков",
+  ])
+  .createItem(40, "minecraft:barrier", 1, 0, "close", "§rЗакрыть GUI");
+new Page("tags", 54, "array:tags")
+  .createItem(48, "minecraft:barrier", 1, 0, "close", "§rЗакрыть")
+  .createItem(50, "minecraft:ender_eye", 1, 0, "page:moder_menu", "§r§lНазад");
+new Page("text", 54, "array:text")
+  .createItem(48, "minecraft:barrier", 1, 0, "close", "§rЗакрыть")
+  .createItem(49, "minecraft:kelp", 1, 0, "spawn:ft", "§rСоздать текст")
+  .createItem(50, "minecraft:ender_eye", 1, 0, "page:moder_menu", "§r§lНазад");
+new Page("lbs", 54, "array:lbs")
+  .createItem(48, "minecraft:barrier", 1, 0, "close", "§rЗакрыть")
+  .createItem(49, "minecraft:kelp", 1, 0, "spawn:lb", "§rСоздать таблицу")
+  .createItem(50, "minecraft:ender_eye", 1, 0, "page:moder_menu", "§r§lНазад");
 /*================================================================================================*/
-
-
-
 
 /**================================================================================================
  * *                                    Настройки мира
@@ -255,4 +380,3 @@ export const предметы = new Page(`items`, 54, "items")
   .createItem(51, default_item, 1, 0, "set", " ")
   .createItem(52, default_item, 1, 0, "set", " ")
   .createItem(53, default_item, 1, 0, "set", " ");
-

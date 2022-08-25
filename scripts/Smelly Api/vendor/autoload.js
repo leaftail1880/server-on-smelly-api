@@ -23,6 +23,7 @@ const Plugins = [
   "Airdrops/index.js",
   "Chest GUI/src/index.js",
   "Smelly Api/src/index.js",
+  "Wallet/money.js"
 ];
 if (wo.QQ("server:spawn")) Plugins.push("Portals/index.js");
 if (wo.QQ("import:wb")) Plugins.push("World Edit/WORLDindex.js");

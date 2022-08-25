@@ -59,7 +59,7 @@ SA.Utilities.time.setTickInterval(() => {
         );
     }
   }
-});
+}, 'gunslore');
 
 //перезарядка
 SA.Utilities.time.setTickInterval(() => {
