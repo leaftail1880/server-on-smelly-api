@@ -29,13 +29,13 @@ import { SA } from "../../index.js";
 /**======================
  **       PLUGINS
  *========================**/
- import "./commands/other.js";
- import "./commands/id.js";
- import "./commands/lore.js";
- import "./commands/particle.js";
- import "./commands/sound.js";
- import "./commands/world.js";
- import "./options.js";
+import "./commands/other.js";
+import "./commands/id.js";
+import "./commands/lore.js";
+import "./commands/particle.js";
+import "./commands/sound.js";
+import "./commands/world.js";
+import "./options.js";
 import { Atp } from "../Portals/index.js";
 import { stringifyEx } from "../../app/Utilities/formatter.js";
 /*------------------------------------------ КОНЕЦ ИМПОРТОВ ------------------------------------------*/
@@ -169,128 +169,135 @@ SA.Build.chat.runCommand("scoreboard objectives add join dummy");
  *
  *
  *================================================================================================**/
-SA.Utilities.time.setTickInterval(() => {
-  /*=========================================== ВЗРЫВНЫЕ ФЕЙРВЕРКИ ===========================================*/
-  for (const f of world.getDimension("overworld").getEntities(qq)) {
-    try {
-      f.runCommand(
-        `execute positioned ${wo.Q("spawn:pos")} run testfor @s[r=200]`
-      );
-      continue;
-    } catch (e) {}
-    try {
-      f.runCommand(
-        `execute positioned ${wo.Q("minigames:pos")} run testfor @s[r=50]`
-      );
-      continue;
-    } catch (e) {}
-    const id = f.dimension.getBlock(
-        SA.Build.entity.locationToBlockLocationn(f.location)
-      ).id,
-      id2 = f.dimension.getBlock(
-        SA.Build.entity.locationToBlockLocationn(
-          new Location(
-            f.location.x,
-            Math.round(f.location.y + 0.8),
-            f.location.z
+SA.Utilities.time.setTickInterval(
+  () => {
+    /*=========================================== ВЗРЫВНЫЕ ФЕЙРВЕРКИ ===========================================*/
+    for (const f of world.getDimension("overworld").getEntities(qq)) {
+      try {
+        f.runCommand(
+          `execute positioned ${wo.Q("spawn:pos")} run testfor @s[r=200]`
+        );
+        continue;
+      } catch (e) {}
+      try {
+        f.runCommand(
+          `execute positioned ${wo.Q("minigames:pos")} run testfor @s[r=50]`
+        );
+        continue;
+      } catch (e) {}
+      const id = f.dimension.getBlock(
+          SA.Build.entity.locationToBlockLocationn(f.location)
+        ).id,
+        id2 = f.dimension.getBlock(
+          SA.Build.entity.locationToBlockLocationn(
+            new Location(
+              f.location.x,
+              Math.round(f.location.y + 0.8),
+              f.location.z
+            )
           )
-        )
-      ).id,
-      id3 = f.dimension.getBlock(
-        SA.Build.entity.locationToBlockLocationn(
-          new Location(
-            f.location.x,
-            Math.round(f.location.y - 0.8),
-            f.location.z
+        ).id,
+        id3 = f.dimension.getBlock(
+          SA.Build.entity.locationToBlockLocationn(
+            new Location(
+              f.location.x,
+              Math.round(f.location.y - 0.8),
+              f.location.z
+            )
           )
-        )
-      ).id;
-    if (
-      id == "minecraft:air" &&
-      id2 == "minecraft:air" &&
-      id3 == "minecraft:air" &&
-      SA.Build.entity.getClosetsEntitys(f, 2, "minecraft:player", 1, false)
-        .length < 1
-    )
-      continue;
-    f.dimension.createExplosion(f.location, 1, boom);
-    f.kill();
-  }
-  /*================================================================================================*/
-
-  /*=========================================== ЗОНА ===========================================*/
-  let rad = 200;
-  const center = wo.Q("zone:center") ? wo.Q("zone:center").split(", ") : [0, 0];
-  for (const p of world.getPlayers()) {
-    rad = rad + 20;
-  }
-  for (const p of world.getPlayers()) {
-    const rmax = new BlockLocation(
-        Number(center[0]) + rad,
-        0,
-        Number(center[1]) + rad
-      ),
-      rmin = new BlockLocation(
-        Number(center[0]) - rad,
-        0,
-        Number(center[1]) - rad
-      );
-    const l = SA.Build.entity.locationToBlockLocation(p.location);
-    if (l.x >= rmax.x && l.x <= rmax.x + 10 && l.z <= rmax.z && l.z >= rmin.z)
-      ret(p, true, rmax);
-    if (l.x >= rmax.x - 10 && l.x <= rmax.x && l.z <= rmax.z && l.z >= rmin.z)
-      pret(p, true, rmax);
-
-    if (l.z >= rmax.z && l.z <= rmax.z + 10 && l.x <= rmax.x && l.x >= rmin.x)
-      ret(p, false, rmax);
-    if (l.z >= rmax.z - 10 && l.z <= rmax.z && l.x <= rmax.x && l.x >= rmin.x)
-      pret(p, false, rmax);
-
-    if (l.x <= rmin.x && l.x >= rmin.x - 10 && l.z <= rmax.z && l.z >= rmin.z)
-      ret(p, true, rmin, true);
-    if (l.x <= rmin.x + 10 && l.x >= rmin.x && l.z <= rmax.z && l.z >= rmin.z)
-      pret(p, true, rmin, true);
-
-    if (l.z <= rmin.z && l.z >= rmin.z - 10 && l.x <= rmax.x && l.x >= rmin.x)
-      ret(p, false, rmin, true);
-    if (l.z <= rmin.z + 10 && l.z >= rmin.z && l.x <= rmax.x && l.x >= rmin.x)
-      pret(p, false, rmin, true);
-
-    if (
-      l.z <= rmin.z &&
-      l.x <= rmin.x &&
-      l.x <= rmax.x &&
-      l.x >= rmin.x &&
-      SA.Build.entity.getScore(p, "inv") != 2 &&
-      !p.hasTag("saving") && !p.hasTag('br:ded')
-    ) {
-      Atp(p, "anarch", true);
+        ).id;
+      if (
+        id == "minecraft:air" &&
+        id2 == "minecraft:air" &&
+        id3 == "minecraft:air" &&
+        SA.Build.entity.getClosetsEntitys(f, 2, "minecraft:player", 1, false)
+          .length < 1
+      )
+        continue;
+      f.dimension.createExplosion(f.location, 1, boom);
+      f.kill();
     }
-  }
-  //* Обновляем глобальный радиус до актуального
-  globalRadius = rad;
+    /*================================================================================================*/
 
-  SA.Build.chat.rcs([
-    'scoreboard objectives add perm dummy "§6скрой это табло"',
-    `scoreboard objectives add lockedtitle dummy`,
-    `scoreboard players add @a lockedtitle 0`,
-  ]);
-  for (const pl of world.getPlayers())
-    try {
-      pl.runCommand(
-        'execute as @s[tag=!"br:inGame"] if block ~ -64 ~ deny 0 run event entity @s spawn'
-      );
-    } catch (E) {}
-  const q = new EntityQueryOptions();
-  q.families = ["monster"];
-  for (const ent of world.getDimension("overworld").getEntities(q))
-    try {
-      ent.runCommand(
-        "execute if block ~ -64 ~ deny run testfor @s[family=monster]"
-      );
-      SA.Build.entity.despawn(ent);
-    } catch (e) {}
-}, 0, 'server0');
+    /*=========================================== ЗОНА ===========================================*/
+    let rad = 200;
+    const center = wo.Q("zone:center")
+      ? wo.Q("zone:center").split(", ")
+      : [0, 0];
+    for (const p of world.getPlayers()) {
+      rad = rad + 20;
+    }
+    for (const p of world.getPlayers()) {
+      const rmax = new BlockLocation(
+          Number(center[0]) + rad,
+          0,
+          Number(center[1]) + rad
+        ),
+        rmin = new BlockLocation(
+          Number(center[0]) - rad,
+          0,
+          Number(center[1]) - rad
+        );
+      const l = SA.Build.entity.locationToBlockLocation(p.location);
+      if (l.x >= rmax.x && l.x <= rmax.x + 10 && l.z <= rmax.z && l.z >= rmin.z)
+        ret(p, true, rmax);
+      if (l.x >= rmax.x - 10 && l.x <= rmax.x && l.z <= rmax.z && l.z >= rmin.z)
+        pret(p, true, rmax);
+
+      if (l.z >= rmax.z && l.z <= rmax.z + 10 && l.x <= rmax.x && l.x >= rmin.x)
+        ret(p, false, rmax);
+      if (l.z >= rmax.z - 10 && l.z <= rmax.z && l.x <= rmax.x && l.x >= rmin.x)
+        pret(p, false, rmax);
+
+      if (l.x <= rmin.x && l.x >= rmin.x - 10 && l.z <= rmax.z && l.z >= rmin.z)
+        ret(p, true, rmin, true);
+      if (l.x <= rmin.x + 10 && l.x >= rmin.x && l.z <= rmax.z && l.z >= rmin.z)
+        pret(p, true, rmin, true);
+
+      if (l.z <= rmin.z && l.z >= rmin.z - 10 && l.x <= rmax.x && l.x >= rmin.x)
+        ret(p, false, rmin, true);
+      if (l.z <= rmin.z + 10 && l.z >= rmin.z && l.x <= rmax.x && l.x >= rmin.x)
+        pret(p, false, rmin, true);
+
+      if (
+        l.z <= rmin.z &&
+        l.x <= rmin.x &&
+        l.x <= rmax.x &&
+        l.x >= rmin.x &&
+        SA.Build.entity.getScore(p, "inv") != 2 &&
+        !p.hasTag("saving") &&
+        !p.hasTag("br:ded")
+      ) {
+        Atp(p, "anarch", true);
+      }
+    }
+    //* Обновляем глобальный радиус до актуального
+    globalRadius = rad;
+
+    SA.Build.chat.rcs([
+      'scoreboard objectives add perm dummy "§6скрой это табло"',
+      `scoreboard objectives add lockedtitle dummy`,
+      `scoreboard players add @a lockedtitle 0`,
+    ]);
+    for (const pl of world.getPlayers())
+      try {
+        pl.runCommand(
+          'execute as @s[tag=!"br:inGame"] if block ~ -64 ~ deny 0 run event entity @s spawn'
+        );
+      } catch (E) {}
+    const q = new EntityQueryOptions();
+    q.families = ["monster"];
+    for (const ent of world.getDimension("overworld").getEntities(q))
+      try {
+        ent.runCommand(
+          "execute if block ~ -64 ~ deny run testfor @s[family=monster]"
+        );
+        SA.Build.entity.despawn(ent);
+      } catch (e) {}
+  },
+  0,
+  "server0"
+);
 
 /*
 |--------------------------------------------------------------------------
@@ -300,203 +307,216 @@ SA.Utilities.time.setTickInterval(() => {
 | Фильтр инвентаря, Пвп мод, При входе, Блокировка незера и Разрешения
 | 
 */
-SA.Utilities.time.setTickInterval(() => {
-  let players = [];
-  for (const p of world.getPlayers()) {
-    players.push(p.name);
+SA.Utilities.time.setTickInterval(
+  () => {
+    let players = [];
+    for (const p of world.getPlayers()) {
+      players.push(p.name);
 
-    //*Фильтр предметов в инвентаре для Chest Gui
-    /**
-     * @type {PlayerInventoryComponentContainer}
-     */
-    const inv = p.getComponent("minecraft:inventory").container;
-    for (let i = 0; i < inv.size; i++) {
-      const item = inv.getItem(i);
-      if (
-        item &&
-        (item?.nameTag?.startsWith("§r§m§n§m") ||
-          item?.nameTag?.startsWith("§m§n§m") ||
-          item?.getLore()[item?.getLore().length]?.endsWith('}'))
-      ) {
-        const item2 = new ItemStack(Items.get(item.id), item.amount, item.data);
-        inv.setItem(i, item2);
+      //*Фильтр предметов в инвентаре для Chest Gui
+      /**
+       * @type {PlayerInventoryComponentContainer}
+       */
+      const inv = p.getComponent("minecraft:inventory").container;
+      for (let i = 0; i < inv.size; i++) {
+        const item = inv.getItem(i),
+          lore = item?.getLore()
+        let lastInd, lastLore
+        if (lore)
+          lastInd = lore.length - 1,
+          lastLore = lore[lastInd];
+        if (
+          item &&
+          (item?.nameTag?.startsWith("§r§m§n§m") ||
+            item?.nameTag?.startsWith("§m§n§m") ||
+            (lastLore && 
+              lastLore?.endsWith("§{§-§}")))
+        ) {
+          const item2 = new ItemStack(
+            Items.get(item.id),
+            item.amount,
+            item.data
+          );
+          inv.setItem(i, item2);
+        }
       }
-    }
 
-    /*================================ PVP MODE ==============================*/
-    if (
-      wo.Q("server:pvpmode:enable") &&
-      po.Q("title:pvpmode", p) &&
-      SA.Build.entity.getTagStartsWith(p, 'lockpvp:') &&
-      SA.Build.entity.getScore(p, "pvp") > 0
-    ) {
-      const score = SA.Build.entity.getScore(p, "pvp");
-      const max = wo.Q("server:pvpmode:cooldown") ?? 15;
-      const q = score == max;
-      try {
-        p.runCommand(
-          `title @s[scores={lockedtitle=0}] actionbar ${
-            q ? "§4»" : ""
-          } §6PvP: ${score} ${q ? "§4«" : ""}`
-        );
-      } catch (e) {}
-    }
-    /*========================================================================*/
-
-    
-
-
-    /*================================ ON JOIN ==============================*/
-    if (SA.Build.entity.getTagStartsWith(p, "joinedAt:")) {
-      const pos = SA.Build.entity.getTagStartsWith(p, "joinedAt:").split(" ");
-      const message =
-        wo
-          .Q("spawn:message")
-          ?.replace("$name", p.name)
-          ?.replace("$время", timeNow())
-          ?.replace("$time", shortTime()) ??
-        `${timeNow()}, ${p.name}!\n§9Время • ${shortTime()}`;
+      /*================================ PVP MODE ==============================*/
       if (
-        p.location.x == pos[0] &&
-        p.location.y == pos[1] &&
-        p.location.z == pos[2]
+        wo.Q("server:pvpmode:enable") &&
+        po.Q("title:pvpmode", p) &&
+        SA.Build.entity.getTagStartsWith(p, "lockpvp:") &&
+        SA.Build.entity.getScore(p, "pvp") > 0
       ) {
-        if (p.hasTag("on_ground")) {
-          SA.Build.chat.runCommand(
-            "scoreboard objectives add animStage1 dummy"
-          );
-          const q = SA.Build.entity.getScore(p, "animStage1");
-          let start;
-          const co = wo.Q("spawn:animcolor") ?? "§f";
-          q <= 5 ? (start = `${co}»  `) : (start = `${co}» `);
-          let end;
-          q <= 5 ? (end = `  ${co}«`) : (end = ` ${co}«`);
-          p.runCommand("title @s times 0 120 0");
+        const score = SA.Build.entity.getScore(p, "pvp");
+        const max = wo.Q("server:pvpmode:cooldown") ?? 15;
+        const q = score == max;
+        try {
           p.runCommand(
-            `title @s actionbar ${
-              wo.Q("spawn:actionbar") ?? "§eСдвинься что бы продолжить"
-            }`
+            `title @s[scores={lockedtitle=0}] actionbar ${
+              q ? "§4»" : ""
+            } §6PvP: ${score} ${q ? "§4«" : ""}`
           );
-          p.runCommand(
-            `title @s title ${start}${wo.Q("spawn:title") ?? "§aServer"}${end}`
-          );
-          p.runCommand(
-            `title @s subtitle ${wo.Q("spawn:subtitle") ?? "Добро пожаловать!"}`
-          );
-          q == 0
-            ? p.runCommand("scoreboard players set @s animStage1 10")
-            : p.runCommand("scoreboard players add @s animStage1 -2");
-        } else {
-          SA.Build.entity.removeTagsStartsWith(p, "joinedAt:");
+        } catch (e) {}
+      }
+      /*========================================================================*/
 
+      /*================================ ON JOIN ==============================*/
+      if (SA.Build.entity.getTagStartsWith(p, "joinedAt:")) {
+        const pos = SA.Build.entity.getTagStartsWith(p, "joinedAt:").split(" ");
+        const message =
+          wo
+            .Q("spawn:message")
+            ?.replace("$name", p.name)
+            ?.replace("$время", timeNow())
+            ?.replace("$time", shortTime()) ??
+          `${timeNow()}, ${p.name}!\n§9Время • ${shortTime()}`;
+        if (
+          p.location.x == pos[0] &&
+          p.location.y == pos[1] &&
+          p.location.z == pos[2]
+        ) {
+          if (p.hasTag("on_ground")) {
+            SA.Build.chat.runCommand(
+              "scoreboard objectives add animStage1 dummy"
+            );
+            const q = SA.Build.entity.getScore(p, "animStage1");
+            let start;
+            const co = wo.Q("spawn:animcolor") ?? "§f";
+            q <= 5 ? (start = `${co}»  `) : (start = `${co}» `);
+            let end;
+            q <= 5 ? (end = `  ${co}«`) : (end = ` ${co}«`);
+            p.runCommand("title @s times 0 120 0");
+            p.runCommand(
+              `title @s actionbar ${
+                wo.Q("spawn:actionbar") ?? "§eСдвинься что бы продолжить"
+              }`
+            );
+            p.runCommand(
+              `title @s title ${start}${
+                wo.Q("spawn:title") ?? "§aServer"
+              }${end}`
+            );
+            p.runCommand(
+              `title @s subtitle ${
+                wo.Q("spawn:subtitle") ?? "Добро пожаловать!"
+              }`
+            );
+            q == 0
+              ? p.runCommand("scoreboard players set @s animStage1 10")
+              : p.runCommand("scoreboard players add @s animStage1 -2");
+          } else {
+            SA.Build.entity.removeTagsStartsWith(p, "joinedAt:");
+
+            SA.Build.chat.rcs([
+              `tellraw @a[tag=!"another:join:disable",name=!"${p.name}"] {"rawtext":[{"translate":"§7${p.name} §8Очнулся в воздухе"}]}`,
+              `scoreboard players add "${p.name}" join 1`,
+              `playsound break.amethyst_cluster @a[tag=!"joinsound:disable"]`,
+            ]);
+            SA.Build.chat.broadcast(message, p.name);
+            p.addTag("WSeenJoinMessage");
+            p.runCommand("title @s clear");
+          }
+        } else if (!p.hasTag("WSeenJoinMessage")) {
+          SA.Build.entity.removeTagsStartsWith(p, "joinedAt:");
           SA.Build.chat.rcs([
-            `tellraw @a[tag=!"another:join:disable",name=!"${p.name}"] {"rawtext":[{"translate":"§7${p.name} §8Очнулся в воздухе"}]}`,
-            `scoreboard players add "${p.name}" join 1`,
+            `tellraw @a[tag=!"another:join:disable",name=!"${p.name}"] {"rawtext":[{"translate":"§7${p.name} §8Сдвинулся"}]}`,
             `playsound break.amethyst_cluster @a[tag=!"joinsound:disable"]`,
+            `scoreboard players add "${p.name}" join 1`,
           ]);
           SA.Build.chat.broadcast(message, p.name);
           p.addTag("WSeenJoinMessage");
           p.runCommand("title @s clear");
         }
-      } else if (!p.hasTag("WSeenJoinMessage")) {
-        SA.Build.entity.removeTagsStartsWith(p, "joinedAt:");
-        SA.Build.chat.rcs([
-          `tellraw @a[tag=!"another:join:disable",name=!"${p.name}"] {"rawtext":[{"translate":"§7${p.name} §8Сдвинулся"}]}`,
-          `playsound break.amethyst_cluster @a[tag=!"joinsound:disable"]`,
-          `scoreboard players add "${p.name}" join 1`,
-        ]);
-        SA.Build.chat.broadcast(message, p.name);
-        p.addTag("WSeenJoinMessage");
-        p.runCommand("title @s clear");
+      }
+      if (!p.hasTag("WSeenLearning") && p.hasTag("WSeenJoinMessage")) {
+        const f = new ActionFormData();
+        f.title("Краткий гайд");
+        f.body(
+          wo
+            .Q("joinform:body", false)
+            ?.replace("$name", p.name)
+            ?.replace("$time", timeNow()) ??
+            `${timeNow()}, ${
+              p.name
+            }!\n§7Для навигации по серверу используется §fменю§7 (зачарованный алмаз в инвентаре).\n  Что бы открыть меню, возьми его в руку и §fиспользуй§7 (зажми на телефоне, ПКМ на пк)\n\n  Помимо него есть еще кастомные §fкоманды§7.\n  Все они вводятся в чат и должны начинаться с '-'.\n  Что бы получить список всех доступных команд пропиши в чат §f-help§7.\n\n\nНажми одну из кнопок внизу, если прочитал гайд.`
+        );
+        f.button("Выход");
+        f.show(p).then((ActionFormResponse) => {
+          if (ActionFormResponse.isCanceled)
+            return SA.Build.chat.broadcast(
+              `А прочитать слабо было? Если все же хочешь прочитать гайд и не задавать вопросы в чате напиши §f-info`,
+              p
+            );
+          p.addTag("WSeenLearning");
+        });
+      }
+      /*========================================================================*/
+
+      /*================== Блокировка незера =================*/
+      if (wo.Q("lock:nether")) {
+        try {
+          p.runCommand(`testforblock ~~~ portal`);
+          p.runCommand(
+            `tellraw @a {"rawtext":[{"text":"§c► §f${p.name}§c Измерение ''Незер'' заблокированно."}]}`
+          );
+          p.runCommand(`fill ~-2~-2~-2 ~2~2~2 air 0 replace portal`);
+        } catch (e) {}
       }
     }
-    if (!p.hasTag("WSeenLearning") && p.hasTag("WSeenJoinMessage")) {
-      const f = new ActionFormData();
-      f.title("Краткий гайд");
-      f.body(
-        wo
-          .Q("joinform:body", false)
-          ?.replace("$name", p.name)
-          ?.replace("$time", timeNow()) ??
-          `${timeNow()}, ${
-            p.name
-          }!\n§7Для навигации по серверу используется §fменю§7 (зачарованный алмаз в инвентаре).\n  Что бы открыть меню, возьми его в руку и §fиспользуй§7 (зажми на телефоне, ПКМ на пк)\n\n  Помимо него есть еще кастомные §fкоманды§7.\n  Все они вводятся в чат и должны начинаться с '-'.\n  Что бы получить список всех доступных команд пропиши в чат §f-help§7.\n\n\nНажми одну из кнопок внизу, если прочитал гайд.`
-      );
-      f.button("Выход");
-      f.show(p).then((ActionFormResponse) => {
-        if (ActionFormResponse.isCanceled)
-          return SA.Build.chat.broadcast(
-            `А прочитать слабо было? Если все же хочешь прочитать гайд и не задавать вопросы в чате напиши §f-info`,
-            p
-          );
-        p.addTag("WSeenLearning");
-      });
-    }
-    /*========================================================================*/
-
-    /*================== Блокировка незера =================*/
-    if (wo.Q("lock:nether")) {
-      try {
-        p.runCommand(`testforblock ~~~ portal`);
-        p.runCommand(
-          `tellraw @a {"rawtext":[{"text":"§c► §f${p.name}§c Измерение ''Незер'' заблокированно."}]}`
-        );
-        p.runCommand(`fill ~-2~-2~-2 ~2~2~2 air 0 replace portal`);
-      } catch (e) {}
-    }
-  }
     /*================================ DEBUG2 ==============================*/
-    if (
-      wo.Q("debug:menu")
-    ) {
-      const q = new EntityQueryOptions()
-      q.type = 'mcbehub:inventory'
-      for (const ent of world.getDimension('overworld').getEntities(q)) {
-        ent.runCommand('particle minecraft:endrod ~~~')
-      } 
+    if (wo.Q("debug:menu")) {
+      const q = new EntityQueryOptions();
+      q.type = "mcbehub:inventory";
+      for (const ent of world.getDimension("overworld").getEntities(q)) {
+        ent.runCommand("particle minecraft:endrod ~~~");
+      }
     }
     /*========================================================================*/
-  /*================================ Разрешения ==============================*/
-  const владельцы = wo.Q("perm:владельцы")
-    ? wo.Q("perm:владельцы")?.split(", ")
-    : ["XilLeR228", "Shp1nat8479"];
-  const модеры = wo.Q("perm:модеры")
-    ? wo.Q("perm:модеры")?.split(", ")
-    : ["CosmoxS17193"];
-  let perm = [];
-  for (const v of владельцы) {
-    if (!players.includes(v)) continue;
-    SA.Build.chat.rcs([
-      `scoreboard players set "${v}" perm 2`,
-      `tag "${v}" add owner`,
-      `tag "${v}" add commands`,
-      `tag "${v}" remove moder`,
-      `op "${v}"`,
-    ]);
-    perm.push(v);
-  }
-  for (const v of модеры) {
-    if (!players.includes(v)) continue;
-    SA.Build.chat.rcs([
-      `scoreboard players set "${v}" perm 1`,
-      `tag "${v}" add commands`,
-      `tag "${v}" add moder`,
-      `tag "${v}" remove owner`,
-      `op "${v}"`,
-    ]);
-    perm.push(v);
-  }
-  for (const v of players) {
-    if (perm.includes(v)) continue;
-    SA.Build.chat.rcs([
-      `scoreboard players set "${v}" perm 0`,
-      `tag "${v}" remove owner`,
-      `tag "${v}" remove commands`,
-      `tag "${v}" remove moder`,
-      `deop "${v}"`,
-    ]);
-  }
-}, 10, 'server10');
+    /*================================ Разрешения ==============================*/
+    const владельцы = wo.Q("perm:владельцы")
+      ? wo.Q("perm:владельцы")?.split(", ")
+      : ["XilLeR228", "Shp1nat8479"];
+    const модеры = wo.Q("perm:модеры")
+      ? wo.Q("perm:модеры")?.split(", ")
+      : ["CosmoxS17193"];
+    let perm = [];
+    for (const v of владельцы) {
+      if (!players.includes(v)) continue;
+      SA.Build.chat.rcs([
+        `scoreboard players set "${v}" perm 2`,
+        `tag "${v}" add owner`,
+        `tag "${v}" add commands`,
+        `tag "${v}" remove moder`,
+        `op "${v}"`,
+      ]);
+      perm.push(v);
+    }
+    for (const v of модеры) {
+      if (!players.includes(v)) continue;
+      SA.Build.chat.rcs([
+        `scoreboard players set "${v}" perm 1`,
+        `tag "${v}" add commands`,
+        `tag "${v}" add moder`,
+        `tag "${v}" remove owner`,
+        `op "${v}"`,
+      ]);
+      perm.push(v);
+    }
+    for (const v of players) {
+      if (perm.includes(v)) continue;
+      SA.Build.chat.rcs([
+        `scoreboard players set "${v}" perm 0`,
+        `tag "${v}" remove owner`,
+        `tag "${v}" remove commands`,
+        `tag "${v}" remove moder`,
+        `deop "${v}"`,
+      ]);
+    }
+  },
+  10,
+  "server10"
+);
 
 /*
 |--------------------------------------------------------------------------
@@ -506,148 +526,153 @@ SA.Utilities.time.setTickInterval(() => {
 | -sit, -base, TOOL, PVP -sec, Другие таймеры
 | 
 */
-SA.Utilities.time.setTickInterval(() => {
-  /*================== -sit доработка =================*/
-  for (const e of SA.Build.world.getEntitys()) {
-    if (e.id != "s:it") continue;
-    const pl = SA.Build.entity.getClosetsEntitys(
-      e,
-      1,
-      "minecraft:player",
-      1,
-      false
-    );
-    if (pl.length < 1) e.triggerEvent("kill");
-  }
-  /*===================================================*/
+SA.Utilities.time.setTickInterval(
+  () => {
+    /*================== -sit доработка =================*/
+    for (const e of SA.Build.world.getEntitys()) {
+      if (e.id != "s:it") continue;
+      const pl = SA.Build.entity.getClosetsEntitys(
+        e,
+        1,
+        "minecraft:player",
+        1,
+        false
+      );
+      if (pl.length < 1) e.triggerEvent("kill");
+    }
+    /*===================================================*/
 
-  /*================== -base доработка =================*/
-  for (const e of world.getDimension("overworld").getEntities(no)) {
-    const block = e.dimension.getBlock(
-      SA.Build.entity.locationToBlockLocation(e.location)
-    );
-    if (block && block.id == "minecraft:barrel") continue;
-    e.nameTag
-      .split(", ")
-      .forEach((e, i, a) =>
-        SA.Build.chat.broadcast(
-          "§cБаза с владельцем §f" + a[0] + "§c разрушена.",
-          e
-        )
+    /*================== -base доработка =================*/
+    for (const e of world.getDimension("overworld").getEntities(no)) {
+      const block = e.dimension.getBlock(
+        SA.Build.entity.locationToBlockLocation(e.location)
       );
-    e.triggerEvent("kill");
-  }
-  /*===================================================*/
-  for (const p of world.getPlayers()) {
-    let q = true
-    //* Переключение инвентаря
-    if (q) try {
-      p.runCommand(
-        `execute positioned ${wo.Q("spawn:pos")} run testfor @p[name="${
-          p.name
-        }",scores={inv=!1},r=200,tag=!"br:ded"]`
-      );
-      q= false
-      Atp(p, "spawn", true);
-      SA.tables.pos.delete(p.name);
-    } catch (e) {}
-    if (q) try {
-      p.runCommand(
-        `execute positioned ${wo.Q("minigames:pos")} run testfor @p[name="${
-          p.name
-        }",scores={inv=!1},r=200,tag=!"br:ded"]`
-      );
-      q= false
-      Atp(p, "minigames", true);
-    } catch (e) {}
-    if (q) try {
-      p.runCommand(
-        `execute as @s if block ~ -64 ~ deny 0 run testfor @p[name="${
-          p.name
-        }",scores={inv=!1},tag=!"br:ded"]`
-      );
-      q= false
-      Atp(p, "currentpos", true);
-    } catch (e) {}
-    /*================ TOOL FUNCTIONS ===================*/
-    if (SA.Build.entity.getHeldItem(p)?.id == "we:tool") {
-      const lore = SA.Build.entity.getHeldItem(p).getLore();
-      if (lore[0] == "Particle") {
-        const q = new BlockRaycastOptions();
-        q.maxDistance = 100;
-        const block = p.getBlockFromViewVector(q);
-        if (block) {
-          world
-            .getDimension("overworld")
-            .spawnParticle(
-              lore[1],
-              new Location(
-                block.location.x + 0.5,
-                block.location.y + 1.5,
-                block.location.z + 0.5
-              ),
-              new MolangVariableMap()
-            );
+      if (block && block.id == "minecraft:barrel") continue;
+      e.nameTag
+        .split(", ")
+        .forEach((e, i, a) =>
+          SA.Build.chat.broadcast(
+            "§cБаза с владельцем §f" + a[0] + "§c разрушена.",
+            e
+          )
+        );
+      e.triggerEvent("kill");
+    }
+    /*===================================================*/
+    for (const p of world.getPlayers()) {
+      let q = true;
+      //* Переключение инвентаря
+      if (q)
+        try {
+          p.runCommand(
+            `execute positioned ${wo.Q("spawn:pos")} run testfor @p[name="${
+              p.name
+            }",scores={inv=!1},r=200,tag=!"br:ded"]`
+          );
+          q = false;
+          Atp(p, "spawn", true);
+          SA.tables.pos.delete(p.name);
+        } catch (e) {}
+      if (q)
+        try {
+          p.runCommand(
+            `execute positioned ${wo.Q("minigames:pos")} run testfor @p[name="${
+              p.name
+            }",scores={inv=!1},r=200,tag=!"br:ded"]`
+          );
+          q = false;
+          Atp(p, "minigames", true);
+        } catch (e) {}
+      if (q)
+        try {
+          p.runCommand(
+            `execute as @s if block ~ -64 ~ deny 0 run testfor @p[name="${p.name}",scores={inv=!1},tag=!"br:ded"]`
+          );
+          q = false;
+          Atp(p, "currentpos", true);
+        } catch (e) {}
+      /*================ TOOL FUNCTIONS ===================*/
+      if (SA.Build.entity.getHeldItem(p)?.id == "we:tool") {
+        const lore = SA.Build.entity.getHeldItem(p).getLore();
+        if (lore[0] == "Particle") {
+          const q = new BlockRaycastOptions();
+          q.maxDistance = 100;
+          const block = p.getBlockFromViewVector(q);
+          if (block) {
+            world
+              .getDimension("overworld")
+              .spawnParticle(
+                lore[1],
+                new Location(
+                  block.location.x + 0.5,
+                  block.location.y + 1.5,
+                  block.location.z + 0.5
+                ),
+                new MolangVariableMap()
+              );
+          }
+        }
+        if (lore[0] == "Stopsound") {
+          p.runCommand("stopsound @s");
+          p.runCommand("music stop");
         }
       }
-      if (lore[0] == "Stopsound") {
-        p.runCommand("stopsound @s");
-        p.runCommand("music stop");
-      }
-    }
-    /*===================================================*/
+      /*===================================================*/
 
-    /*================== ПВП -сек =================*/
-    if (wo.Q("server:pvpmode:enable"))
+      /*================== ПВП -сек =================*/
+      if (wo.Q("server:pvpmode:enable"))
+        try {
+          p.runCommand("scoreboard players remove @s[scores={pvp=1..}] pvp 1");
+        } catch (e) {}
+      /*===================================================*/
+
+      /*================== Другие таймеры =================*/
+      if (wo.Q("timer:enable")) {
+        Allsec.Eadd(p, 1);
+        if (Allsec.Eget(p) >= 60) {
+          Allmin.Eadd(p, 1);
+          Allsec.Eset(p, 0);
+        }
+        if (Allmin.Eget(p) >= 60) {
+          Allhrs.Eadd(p, 1);
+          Allmin.Eset(p, 0);
+        }
+        Daysec.Eadd(p, 1);
+        if (Daysec.Eget(p) >= 60) {
+          Daymin.Eadd(p, 1);
+          Daysec.Eset(p, 0);
+        }
+        if (Daymin.Eget(p) >= 60) {
+          Dayhrs.Eadd(p, 1);
+          Daymin.Eset(p, 0);
+        }
+        Seasec.Eadd(p, 1);
+        if (Seasec.Eget(p) >= 60) {
+          Seamin.Eadd(p, 1);
+          Seasec.Eset(p, 0);
+        }
+        if (Seamin.Eget(p) >= 60) {
+          Seahrs.Eadd(p, 1);
+          Seamin.Eset(p, 0);
+        }
+      }
+      if (wo.Q("perm:data") != Math.floor(Date.now() / 84400000)) {
+        wo.set("perm:data", Math.floor(Date.now() / 84400000));
+        Dayhrs.reset();
+        Daymin.reset();
+        Daysec.reset();
+        SA.Build.chat.broadcast("Days reseted");
+      }
       try {
-        p.runCommand("scoreboard players remove @s[scores={pvp=1..}] pvp 1");
+        p.runCommand(
+          "scoreboard players remove @s[scores={lockedtitle=1..}] lockedtitle 1"
+        );
       } catch (e) {}
-    /*===================================================*/
-
-    /*================== Другие таймеры =================*/
-    if (wo.Q("timer:enable")) {
-      Allsec.Eadd(p, 1);
-      if (Allsec.Eget(p) >= 60) {
-        Allmin.Eadd(p, 1);
-        Allsec.Eset(p, 0);
-      }
-      if (Allmin.Eget(p) >= 60) {
-        Allhrs.Eadd(p, 1);
-        Allmin.Eset(p, 0);
-      }
-      Daysec.Eadd(p, 1);
-      if (Daysec.Eget(p) >= 60) {
-        Daymin.Eadd(p, 1);
-        Daysec.Eset(p, 0);
-      }
-      if (Daymin.Eget(p) >= 60) {
-        Dayhrs.Eadd(p, 1);
-        Daymin.Eset(p, 0);
-      }
-      Seasec.Eadd(p, 1);
-      if (Seasec.Eget(p) >= 60) {
-        Seamin.Eadd(p, 1);
-        Seasec.Eset(p, 0);
-      }
-      if (Seamin.Eget(p) >= 60) {
-        Seahrs.Eadd(p, 1);
-        Seamin.Eset(p, 0);
-      }
     }
-    if (wo.Q("perm:data") != Math.floor(Date.now() / 84400000)) {
-      wo.set("perm:data", Math.floor(Date.now() / 84400000));
-      Dayhrs.reset();
-      Daymin.reset();
-      Daysec.reset();
-      SA.Build.chat.broadcast("Days reseted");
-    }
-    try {
-      p.runCommand(
-        "scoreboard players remove @s[scores={lockedtitle=1..}] lockedtitle 1"
-      );
-    } catch (e) {}
-  }
-}, 20, 'server20');
+  },
+  20,
+  "server20"
+);
 
 /*
 |--------------------------------------------------------------------------
@@ -700,9 +725,20 @@ new SA.Command(
     tags: ["commands"],
   },
   (ctx) => {
-    const block = world.getDimension('overworld').getBlock(SA.Build.entity.locationToBlockLocation(ctx.sender.location).offset(0, -1, 0))
-    if (block.getComponent('inventory')?.container) return ctx.reply(stringifyEx(block.getComponent('inventory')?.container, ' ') + '\n' + stringifyEx(block, ' '))
-    ctx.reply('§cError')
+    const block = world
+      .getDimension("overworld")
+      .getBlock(
+        SA.Build.entity
+          .locationToBlockLocation(ctx.sender.location)
+          .offset(0, -1, 0)
+      );
+    if (block.getComponent("inventory")?.container)
+      return ctx.reply(
+        stringifyEx(block.getComponent("inventory")?.container, " ") +
+          "\n" +
+          stringifyEx(block, " ")
+      );
+    ctx.reply("§cError");
   }
 );
 
@@ -1004,7 +1040,7 @@ world.events.entityHurt.subscribe((data) => {
   if (
     data.hurtEntity.id == "t:hpper_minecart" ||
     !wo.Q("server:pvpmode:enable") ||
-    SA.Build.entity.getTagStartsWith(data.hurtEntity, 'lockpvp:')
+    SA.Build.entity.getTagStartsWith(data.hurtEntity, "lockpvp:")
   )
     return;
   if (data?.damagingEntity?.id == "minecraft:player") {
@@ -1131,5 +1167,3 @@ world.events.beforeItemUse.subscribe((data) => {
     }
   }
 });
-
-

@@ -27,7 +27,7 @@ export const text = {
     '§7----------',
     ` §${balance >= price ? 'f§r' : 'c'}Цена: ${price}`,
     `§r Баланс: ${balance}`,
-    '§7----------',
+    '§7----------§{§-§}',
   ],
   "shop.notenought": (price, balance) => 
 

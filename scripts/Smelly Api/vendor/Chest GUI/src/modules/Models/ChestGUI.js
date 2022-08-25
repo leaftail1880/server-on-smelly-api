@@ -748,17 +748,16 @@ export class ChestGUI {
   static getSlotChange(oldInv, newInv) {
     if (oldInv.length != newInv.length) return null;
     for (let i = 0; i < oldInv.length; i++) {
-      // if (
-      //   oldInv[i].uid != newInv[i].uid &&
-      //   oldInv[i].item.id == newInv[i].item.id &&
-      //   oldInv[i].item.nameTag == newInv[i].item.nameTag &&
-      //   oldInv[i].item.data == newInv[i].item.data &&
-      //   oldInv[i].item.getLore() == newInv[i].item.getLore()
-      // ) {
-      //   oldInv[i].item.amount = oldInv[i].item.amount - newInv[i].item.amount;
-      //   SA.Build.chat.broadcast('yaaaaaaaaaay')
-      //   return { slot: i, item: oldInv[i].item };
-      // }
+      if (
+        oldInv[i].uid != newInv[i].uid &&
+        oldInv[i].item?.id == newInv[i].item?.id &&
+        oldInv[i].item?.nameTag == newInv[i].item?.nameTag &&
+        oldInv[i].item?.data == newInv[i].item?.data //&&
+        //oldInv[i].item.getLore() == newInv[i].item.getLore()
+      ) {
+        oldInv[i].item.amount = oldInv[i].item.amount - newInv[i].item.amount;
+        return { slot: i, item: oldInv[i].item, ex: true };
+      }
 
       if (oldInv[i].uid != newInv[i].uid)
         return { slot: i, item: oldInv[i].item };
@@ -823,7 +822,7 @@ export class ChestGUI {
           this.mapInventory
         );
         if (change == null) return;
-        this.onSlotChange(change);
+        this.onSlotChange(change, change.ex ? change.item.amount : '');
       }),
       playerLeave: world.events.playerLeave.subscribe(({ playerName }) => {
         if (playerName != this.player.name) return;
@@ -1012,7 +1011,7 @@ export class ChestGUI {
    * This runs when a slot gets changed in the chest inventory
    * @param {SlotChangeReturn} change slot that was changed
    */
-  onSlotChange(change) {
+  onSlotChange(change, ex) {
     /**
      * The guiItem that was changed
      * @type {import("./Page.js").Item}
@@ -1035,7 +1034,7 @@ export class ChestGUI {
         // console.warn(`itemStack: ${change.item.id}`);
         // change.item.nameTag = "boiiiiii";
         this.player.runCommand(
-          `clear @s ${item.type} ${item.data} ${item.amount}`
+          `clear @s ${item.type} ${item.data} ${ex ? ex : item.amount}`
         );
       } catch (error) {
         // the item couldnt be cleared that means
