@@ -313,8 +313,7 @@ export function Atp(player, place, ignorepvp, ignorebr, ignorequene, setDefaultI
     return player.runCommand(
       `tellraw @s {"rawtext":[{"text":"§cТупые админы забыли поставить корды ${place}"}]}`
     );
-  let pos;
-  let rtp = false;
+  let pos, rtp = false, air = false;
   if (place == "anarch") {
     SA.tables.pos.has(player.name)
       ? (pos = SA.tables.pos.get(player.name))
@@ -353,20 +352,23 @@ export function Atp(player, place, ignorepvp, ignorebr, ignorequene, setDefaultI
       if (b && b.location.y >= 63) {y = b.location.y + 1; break}
     }
     if (!y)
-      SA.Build.chat.broadcast(
-        "§cНе удалось найти подходящее место на земле",
-        player.name
-      ),
+      air = true,
         (y = 200),
-        player.addEffect(MinecraftEffectTypes.slowFalling, 500, 1, false);
+        player.runCommand('effect @s slow_falling 20 1 true');
     pos = x + " " + y + " " + z;
-    SA.Build.chat.broadcast("> " + pos, player.name);
+    SA.Build.chat.broadcast(`§r§${air?'5':'9'}↨ ` + pos, player.name);
   }
+
   if (currentInv == invs.anarch) {
     const l = SA.Build.entity.locationToBlockLocation(player.location);
     SA.tables.pos.set(player.name, l.x + " " + l.y + " " + l.z);
   }
   const inve = SA.Build.entity.getI(player);
+  let obj = {on: false}
+  if (Object.keys(invs).find(e=>invs[e] == currentInv)) obj = {
+    on: true,
+    place: Object.keys(invs).find(e=>invs[e] == currentInv)
+  }
   if ((
     currentInv == ps ||
     (inve.size == inve.emptySlotsCount && place != "anarch")) && !setDefaultInventory
@@ -383,7 +385,8 @@ export function Atp(player, place, ignorepvp, ignorebr, ignorequene, setDefaultI
             player,
             pos,
             place,
-            po.Q("title:spawn:enable", player)
+            po.Q("title:spawn:enable", player),
+            obj
           );
         })
       );
@@ -393,7 +396,8 @@ export function Atp(player, place, ignorepvp, ignorebr, ignorequene, setDefaultI
         player,
         pos,
         place,
-        po.Q("title:spawn:enable", player)
+        po.Q("title:spawn:enable", player),
+        obj
       );
     }
   }
@@ -497,6 +501,7 @@ world.events.beforeDataDrivenEntityTriggerEvent.subscribe((data) => {
         poo,
         i.getLore()[2],
         po.Q("title:spawn:enable", data.entity),
+        {on: false},
         i.getLore()[3]
       );
       break;

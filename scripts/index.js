@@ -12,5 +12,4 @@
 import { SA } from "./Smelly Api/index.js"; 
 
 // УВДИДЬ ЭТО
-
 // Other code can go beyond this point

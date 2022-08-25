@@ -1,12 +1,14 @@
 import {
   BlockLocation,
   BlockRaycastOptions,
+  EnchantmentList,
   EntityQueryOptions,
   ExplosionOptions,
   Items,
   ItemStack,
   Location,
   MinecraftBlockTypes,
+  MinecraftEnchantmentTypes,
   MolangVariableMap,
   PlayerInventoryComponentContainer,
   SoundOptions,
@@ -36,7 +38,7 @@ import "./commands/particle.js";
 import "./commands/sound.js";
 import "./commands/world.js";
 import "./options.js";
-import "../Private/private.js"
+import "../Private/private.js";
 import { Atp } from "../Portals/index.js";
 import { stringifyEx } from "../../app/Utilities/formatter.js";
 import { stats } from "../Private/private.js";
@@ -144,11 +146,13 @@ export let globalRadius = 200;
  *=============================================**/
 const qq = new EntityQueryOptions();
 qq.type = "fireworks_rocket";
-const boom = new ExplosionOptions();
-boom.breaksBlocks = true;
-boom.causesFire = false;
+
 const no = new EntityQueryOptions();
 no.type = "s:base";
+
+const boom = new ExplosionOptions();
+boom.breaksBlocks = false;
+boom.causesFire = false;
 /*=============== END OF SECTION ==============*/
 
 /**
@@ -163,6 +167,30 @@ no.type = "s:base";
 //*Немного скорбордов
 SA.Build.chat.runCommand("scoreboard players reset * perm");
 SA.Build.chat.runCommand("scoreboard objectives add join dummy");
+
+const arraspdk = ["^^^1", "^^^2", "~~~", "~~-1~", "~~1~"] // 
+
+// for (let x = -1; x <= 1; x++) {
+//   for (let y = -1; y <= 1; y++) {
+//     for (let z = -1; z <= 1; z++) {
+//       if (x+y+z == x*3) continue
+//       arraspdk.push(`~${x!=0?x:''}~${y!=0?y:''}~${z!=0?z:''}`)
+//     }
+//   }
+// }
+// SA.Build.chat.broadcast(arraspdk.join(', '))
+
+
+function check(f) {
+  try {
+    arraspdk.forEach((e) =>
+      f.runCommand(`testforblock ${e} air`)
+    );
+    return true
+  } catch (e) {
+    return false
+  }
+}
 
 /*=========================================== ВЗРЫВНЫЕ ФЕЙРВЕРКИ ===========================================*/
 SA.Utilities.time.setTickInterval(() => {
@@ -179,37 +207,73 @@ SA.Utilities.time.setTickInterval(() => {
       );
       continue;
     } catch (e) {}
-    const id = f.dimension.getBlock(
-        SA.Build.entity.locationToBlockLocationn(f.location)
-      ).id,
-      id2 = f.dimension.getBlock(
-        SA.Build.entity.locationToBlockLocationn(
-          new Location(
-            f.location.x,
-            Math.round(f.location.y + 0.8),
-            f.location.z
-          )
-        )
-      ).id,
-      id3 = f.dimension.getBlock(
-        SA.Build.entity.locationToBlockLocationn(
-          new Location(
-            f.location.x,
-            Math.round(f.location.y - 0.8),
-            f.location.z
-          )
-        )
-      ).id;
-    if (
-      id == "minecraft:air" &&
-      id2 == "minecraft:air" &&
-      id3 == "minecraft:air" &&
-      SA.Build.entity.getClosetsEntitys(f, 2, "minecraft:player", 1, false)
-        .length < 1
-    )
-      continue;
-    f.dimension.createExplosion(f.location, 1, boom);
+    if (!SA.Build.entity.getTagStartsWith(f, "l:")) {
+      const sender = SA.Build.entity.getClosetsEntitys(
+        f,
+        2,
+        "minecraft:player",
+        1,
+        false
+      )[0];
+      if (sender) {
+        const lore = SA.Build.entity.getHeldItem(sender).getLore()[0];
+        if (!lore || lore == "§r§н") continue;
+        if (lore == "§r§б") f.addTag("блоки");
+        if (lore == "§r§и") f.addTag("игроки");
+        stats.FVlaunc.Eadd(sender, 1);
+        f.addTag("l:" + sender.name);
+      }
+    }
+    // const id = f.dimension.getBlock(
+    //     SA.Build.entity.locationToBlockLocationn(f.location)
+    //   ).id,
+    //   id2 = f.dimension.getBlock(
+    //     SA.Build.entity.locationToBlockLocationn(
+    //       new Location(
+    //         f.location.x,
+    //         Math.round(f.location.y + 0.8),
+    //         f.location.z
+    //       )
+    //     )
+    //   ).id,
+    //   id3 = f.dimension.getBlock(
+    //     SA.Build.entity.locationToBlockLocationn(
+    //       new Location(
+    //         f.location.x,
+    //         Math.round(f.location.y - 0.8),
+    //         f.location.z
+    //       )
+    //     )
+    //   ).id;
+    // if (
+    //   id == "minecraft:air" &&
+    //   id2 == "minecraft:air" &&
+    //   id3 == "minecraft:air"
+    // )
+    //   continue;
+    const type = f.hasTag("блоки") ? 2 : f.hasTag("игроки") ? 3 : 0;
+    //console.warn(type);
+    if (type == 0) continue;
+    if (type == 2) {
+      if (check(f)) {
+        continue
+      }
+       else boom.breaksBlocks = true;}
+
+    if (type == 3)
+      try {
+        f.runCommand("testforblock ^^^1 air");
+        f.runCommand("testforblock ^^^2 air");
+        continue;
+      } catch (e) {}
+    let a = [...world.getPlayers()].find(
+      (e) => e.name == SA.Build.entity.getTagStartsWith(f, "l:")
+    );
+    // SA.Build.chat.broadcast(a.name);
+    if (a) stats.FVboom.Eadd(a, 1);
+    f.dimension.createExplosion(f.location, type, boom);
     f.kill();
+    boom.breaksBlocks = false;
   }
 });
 
@@ -340,6 +404,25 @@ SA.Utilities.time.setTickInterval(
             item.data
           );
           inv.setItem(i, item2);
+        }
+        if (item && item.id == "minecraft:crossbow") {
+          /**
+           * @type {EnchantmentList}
+           */
+          let ench = item.getComponent("enchantments").enchantments,
+            o = false;
+          const mm = ench.getEnchantment(MinecraftEnchantmentTypes.multishot),
+            m = ench.getEnchantment(MinecraftEnchantmentTypes.piercing);
+          if (m) item.setLore(["§r§б", "§r§fЦель ракет: §6блоки"]), (o = true), item.nameTag = '§r§fРазрывная';
+          if (mm)
+            item.setLore(["§r§и", "§r§fЦель ракет: §6игроки"]), (o = true), item.nameTag = '§r§fПодрыв жоп';
+          if (!o)
+            item.setLore([
+              "§r§н",
+              "§r§fБронебойность: §6блоки",
+              "§r§fТройной выстрел: §6игроки",
+            ]);
+          inv.setItem(i, item);
         }
       }
 

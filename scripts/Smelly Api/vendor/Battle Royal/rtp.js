@@ -85,7 +85,7 @@ export function rtp(player, xx, zz, maxrad, minrad, otherposes) {
       player.name
     );
     y = 100;
-    player.addEffect(MinecraftEffectTypes.slowFalling, 500, 1, false);
+    player.runCommand('effect @s slow_falling 20 1 true');
   }
   player.teleport(
     new Location(x, y, z),

@@ -10,6 +10,18 @@ import {
 } from "mojang-minecraft";
 import { SHAPES } from "../../vendor/World Edit/modules/definitions/shapes.js";
 
+export function getPlace(place, text) {
+  //Place, prefix symbol color, rotation
+  let P, C, rot;
+  if (place == "anarch") (P = "§cАнархия"), (C = "4")
+  if (place == "spawn") (P = "§aСпавн"), (C = "2"), (rot = "0 0");
+  if (place == "br") (P = "§6Батл рояль"), (C = "e"), (rot = "0 0");
+  if (place == "minigames" || place == "currentpos")
+    (P = "§dМиниигры§r"), (C = "5"), (rot = "0 0");
+  if (!P) (P = place), (C = text);
+  return {P, C, rot}
+}
+
 export class EntityBuilder {
   /**
    * Get entitie(s) at a position
@@ -288,22 +300,21 @@ export class EntityBuilder {
    * @returns void
    * @example tp(player, '0 0 0', 'spawn', po.Q('tp', player))
    */
-  tp(player, pos, place, resultActionbar = false, text) {
+  tp(player, pos, place, resultActionbar = false, obj, text) {
     try {
       player.runCommand("effect @s clear");
     } catch (e) {}
-
-    let P, C, rot;
-    if (place == "anarch") (P = "§cАнархия"), (C = "4")
-    if (place == "spawn") (P = "§aСпавн"), (C = "2"), (rot = "0 0");
-    if (place == "br") (P = "§6Батл рояль"), (C = "e"), (rot = "0 0");
-    if (place == "minigames" || place == "currentpos")
-      (P = "§dМиниигры§r"), (C = "5"), (rot = "0 0");
-    if (!P) (P = place), (C = text);
+    let befplace
+    if (obj && obj.on) {
+      let {P, C} = getPlace(obj.place, '')
+      befplace = `§${C}◙ §3${P}§r > `
+    }
+    
+    let {P, C, rot} = getPlace(place, text)
     player.runCommand(`tp ${pos}${rot != undefined ? ` ${rot}` : ''}`);
     if (resultActionbar)
       player.runCommand(`title @s actionbar §${C}◙ §3${P} §${C}◙§r`);
-    player.runCommand(`tellraw @s {"rawtext":[{"translate":"§${C}◙ §3${P}"}]}`);
+    player.runCommand(`tellraw @s {"rawtext":[{"translate":"${befplace?befplace:''}§${C}◙ §3${P}"}]}`);
   }
   /**
    * Gets the inventory of a entity

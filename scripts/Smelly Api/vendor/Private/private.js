@@ -25,9 +25,10 @@ import { SA } from "../../index.js";
  **                  Стата
  *=============================================**/
 export const stats = {
-  Bplace: new wow('blockPlace', 'Поставлено блоков'),
+  Bplace: new wow('blockPlace', 'Поставлено блок'),
   Bbreak: new wow('blockBreak', 'Сломано блоков'),
-  FVlaunc: new wow('FVlaunc', 'Фейрверков запущено'),
+  FVlaunc: new wow('FVlaunc', 'Фв запущено'),
+  FVboom: new wow('FVboom', 'Фв взорвано'),
   Hget: new wow('Hget', 'Урона получено'),
   Hgive: new wow('Hgive', 'Урона нанесено'),
   kills: new wow('kills', 'Убийств'),
@@ -93,9 +94,11 @@ const base = new SA.Command(
     type: "public",
   },
   (ctx) => {
+    if (SA.Build.entity.getScore(ctx.sender, 'pvp') > 0) return ctx.reply('§4► §cПодождите еще §6' + SA.Build.entity.getScore(ctx.sender, 'pvp') + ' сек')
     const basepos = SA.Build.entity
-      .getTagStartsWith(ctx.sender, "base: ")
-      ?.split(", ")
+    .getTagStartsWith(ctx.sender, "base: ")
+    ?.split(", ")
+
       ?.map((e) => (e = parseInt(e)));
     if (basepos) {
       const bl = new BlockLocation(basepos[0], basepos[1], basepos[2]);
@@ -108,7 +111,7 @@ const base = new SA.Command(
         return ctx.reply(
           "§7Доступные действия с базой на §6" +
             SA.Build.entity.getTagStartsWith(ctx.sender, "base: ") +
-            ":\n§f  -base addpl - §o§7Добавить игрока. §fИгрок должен встать рядом с базой, а затем вы должны прописать это.§r" +
+            ":\n§f  -base add - §o§7Добавить игрока. §fИгрок должен встать рядом с базой, а затем вы должны прописать это.§r" +
             "\n§f  -base remove <Имя игрока> - §o§7Удалить игрока.§r" +
             "\n§f  -base list - §o§7Список баз, в которые вы добавлены.§r" +
             "\n§7Что бы убрать базу, сломай бочку.§r"
@@ -116,9 +119,10 @@ const base = new SA.Command(
       } else SA.Build.entity.removeTagsStartsWith(ctx.sender, "base: ");
     }
     try {
+      if (SA.Build.entity.getScore(ctx.sender, 'inv') == 1) return ctx.reply('§cБазу можно поставить только на анархии')
       ctx.sender.runCommand("testforblock ~~~ chest");
     } catch (e) {
-      return ctx.reply("§cВстань на сундук");
+      return ctx.reply("§cДля создания базы поставьте сундук, встаньте на него и напишите §f-base");
     }
     if (
       SA.Build.entity.getClosetsEntitys(ctx.sender, 30, "s:base", 1, false)
@@ -140,11 +144,12 @@ const base = new SA.Command(
         block.location.z
     );
     ctx.reply(
-      "§7База успешно зарегистрированна!\n  Теперь взаимодействовать с блоками в радиусе 20 блоков от базы можете толко вы и добавленные пользователи (добавить: §f-base addpl§7)\n  Если в базе не будет (а какие ресы то ставить лол), она перестанет работать и приват спадет"
+      "§7  База успешно зарегистрированна!\n\n  Теперь взаимодействовать с блоками в радиусе 20 блоков от базы можете только вы и добавленные пользователи(добавить: §f-base add§7)\n\n  Из блока базы (бочки) каждый час будет удалятся несколько предметов. Если в базе не будет никаких ресурсов, приват перестанет работать."
     );
   }
 );
-base.addSubCommand({ name: "addpl" }, (ctx) => {
+base.addSubCommand({ name: "add", description: 'Добавляет игрока' }, (ctx) => {
+  if (SA.Build.entity.getScore(ctx.sender, 'pvp') > 0) return ctx.reply('§4► §cПодождите еще §6' + SA.Build.entity.getScore(ctx.sender, 'pvp') + ' сек')
   const basepos = SA.Build.entity
     .getTagStartsWith(ctx.sender, "base: ")
     ?.split(", ")
@@ -181,9 +186,10 @@ base.addSubCommand({ name: "addpl" }, (ctx) => {
   ctx.reply(`§6${pl.name}§7 добавлен в приват. Теперь там §6${ent.nameTag}`);
 });
 base
-  .addSubCommand({ name: "remove" })
+  .addSubCommand({ name: "remove",description: 'Удаляет игрока из базы' })
   .addOption("player", "string")
   .executes((ctx, { player }) => {
+    if (SA.Build.entity.getScore(ctx.sender, 'pvp') > 0) return ctx.reply('§4► §cПодождите еще §6' + SA.Build.entity.getScore(ctx.sender, 'pvp') + ' сек')
     const basepos = SA.Build.entity
       .getTagStartsWith(ctx.sender, "base: ")
       ?.split(", ")
@@ -243,7 +249,8 @@ base
     ent.nameTag = arr2.join(", ");
     ctx.reply(`§6${player}§7 удален из в привата. Теперь там §6${ent.nameTag}`);
   });
-base.addSubCommand({ name: "list" }, (ctx) => {
+base.addSubCommand({ name: "list", description: 'Список баз' }, (ctx) => {
+  if (SA.Build.entity.getScore(ctx.sender, 'pvp') > 0) return ctx.reply('§4► §cПодождите еще §6' + SA.Build.entity.getScore(ctx.sender, 'pvp') + ' сек')
   const basepos = SA.Build.entity
     .getTagStartsWith(ctx.sender, "base: ")
     ?.split(", ")
