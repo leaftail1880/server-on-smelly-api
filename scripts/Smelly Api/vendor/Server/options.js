@@ -34,6 +34,8 @@ new PlayerOption(
 new PlayerOption("another:join:disable", '§cВыключает§r чужие сообщения о входе')
 new PlayerOption("joinsound:disable", '§cВыключает§r звук входа')
 
+new PlayerOption('anarchy:hideCoordinates', 'Скрывает координаты при телепортации на анархию')
+
 new WorldOption(
   "lock:nether",
   "Если эта настройка включена, порталы в незер будут автоматически ломаться"

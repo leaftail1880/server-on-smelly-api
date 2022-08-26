@@ -168,7 +168,9 @@ class inventory {
     if (i != invs.anarch) {
       //console.warn("Загрузка стандартного инвентаря");
       SA.Build.chat.runCommand(`clear ${pl.name}`);
-      SA.Build.chat.runCommand(`replaceitem entity ${pl.name} slot.hotbar 4 mcbehub:gui 1 0 {"item_lock":{"mode":"lock_in_slot"}}`);
+      SA.Build.chat.runCommand(
+        `replaceitem entity ${pl.name} slot.hotbar 4 mcbehub:gui 1 0 {"item_lock":{"mode":"lock_in_slot"}}`
+      );
     } else {
       //console.warn("Загрузка инвентаря анархии, старт");
 
@@ -224,9 +226,8 @@ world.events.beforeDataDrivenEntityTriggerEvent.subscribe((data) => {
     data.entity.hasTag("saving")
   )
     return;
-  stats.deaths.Eadd(data.entity, 1)
-  if (
-    data.entity.hasTag("br:alive")) return
+  stats.deaths.Eadd(data.entity, 1);
+  if (data.entity.hasTag("br:alive")) return;
   data.cancel = true;
   const ent = data.entity.dimension.spawnEntity(
     "t:hpper_minecart",
@@ -293,15 +294,25 @@ SA.Utilities.time.setTickInterval(() => {
  * @returns void
  * @example tp(player, 'spawn')
  */
-export function Atp(player, place, ignorepvp, ignorebr, ignorequene, setDefaultInventory) {
-  if (!ignorebr && SA.Build.entity.getTagStartsWith(player, 'locktp:'))
-  return player.runCommand(
-    `tellraw @s {"rawtext":[{"translate":"§c► Сейчас это запрещено (префикс запрета: ${SA.Build.entity.getTagStartsWith(player, 'locktp:')})"}]}`
-  );
+export function Atp(
+  player,
+  place,
+  ignorepvp,
+  ignorebr,
+  ignorequene,
+  setDefaultInventory
+) {
+  if (!ignorebr && SA.Build.entity.getTagStartsWith(player, "locktp:"))
+    return player.runCommand(
+      `tellraw @s {"rawtext":[{"translate":"§c► Сейчас это запрещено (префикс запрета: ${SA.Build.entity.getTagStartsWith(
+        player,
+        "locktp:"
+      )})"}]}`
+    );
   if (!ignorequene && Object.keys(quene).includes(player.name))
-  return player.runCommand(
-    `tellraw @s {"rawtext":[{"translate":"§c► Вы не можете телепортироваться, стоя в очереди. Выйти: §f-br quit"}]}`
-  );
+    return player.runCommand(
+      `tellraw @s {"rawtext":[{"translate":"§c► Вы не можете телепортироваться, стоя в очереди. Выйти: §f-br quit"}]}`
+    );
   if (!ignorepvp && SA.Build.entity.getScore(player, "pvp") > 0)
     return player.runCommand(
       `tellraw @s {"rawtext":[{"translate":"§c► В режиме пвп это запрещено"}]}`
@@ -313,7 +324,9 @@ export function Atp(player, place, ignorepvp, ignorebr, ignorequene, setDefaultI
     return player.runCommand(
       `tellraw @s {"rawtext":[{"text":"§cТупые админы забыли поставить корды ${place}"}]}`
     );
-  let pos, rtp = false, air = false;
+  let pos,
+    rtp = false,
+    air = false;
   if (place == "anarch") {
     SA.tables.pos.has(player.name)
       ? (pos = SA.tables.pos.get(player.name))
@@ -343,20 +356,29 @@ export function Atp(player, place, ignorepvp, ignorebr, ignorequene, setDefaultI
         Number(center[1]) + globalRadius - 10,
         Number(center[1]) - globalRadius + 10
       );
-      const q = new BlockRaycastOptions()
-      q.includeLiquidBlocks = false,
-      q.includePassableBlocks = false
+      const q = new BlockRaycastOptions();
+      (q.includeLiquidBlocks = false), (q.includePassableBlocks = false);
       const b = world
-      .getDimension("overworld")
-      .getBlockFromRay(new Location(x, 320, z), new Vector(0, -1, 0));
-      if (b && b.location.y >= 63) {y = b.location.y + 1; break}
+        .getDimension("overworld")
+        .getBlockFromRay(new Location(x, 320, z), new Vector(0, -1, 0));
+      if (b && b.location.y >= 63) {
+        y = b.location.y + 1;
+        break;
+      }
     }
-    if (!y)
-      air = true,
-        (y = 200),
-        player.runCommand('effect @s slow_falling 20 1 true');
+    if (!y) {
+      air = true;
+      y = 200;
+    }
     pos = x + " " + y + " " + z;
-    SA.Build.chat.broadcast(`§r§${air?'5':'9'}↨ ` + pos, player.name);
+
+  }
+
+  if (ps == invs.anarch) {
+    SA.Build.chat.broadcast(
+      `§r§${air ? "5Воздух" : "9Земля"}§r ${po.Q('anarchy:hideCoordinates', player) ? "" : pos}`,
+      player.name
+    );
   }
 
   if (currentInv == invs.anarch) {
@@ -364,29 +386,31 @@ export function Atp(player, place, ignorepvp, ignorebr, ignorequene, setDefaultI
     SA.tables.pos.set(player.name, l.x + " " + l.y + " " + l.z);
   }
   const inve = SA.Build.entity.getI(player);
-  let obj = {on: false}
-  if (Object.keys(invs).find(e=>invs[e] == currentInv)) obj = {
-    on: true,
-    place: Object.keys(invs).find(e=>invs[e] == currentInv)
-  }
-  if ((
-    currentInv == ps ||
-    (inve.size == inve.emptySlotsCount && place != "anarch")) && !setDefaultInventory
+  let obj = { on: false };
+  if (Object.keys(invs).find((e) => invs[e] == currentInv))
+    obj = {
+      on: true,
+      place: Object.keys(invs).find((e) => invs[e] == currentInv),
+    };
+  if (
+    (currentInv == ps ||
+      (inve.size == inve.emptySlotsCount && place != "anarch")) &&
+    !setDefaultInventory
   ) {
-    SA.Build.entity.tp(player, pos, place, po.Q("title:spawn:enable", player));
+    SA.Build.entity.tp(player, pos, place, po.Q("title:spawn:enable", player), null, null, air);
     player.runCommand(`scoreboard players set @s ${objectives[0]} ${ps}`);
   } else {
     try {
       if (!setDefaultInventory) player.runCommand("testfor @s[m=!c]");
-      inv.saveInv(currentInv, player).then((e) =>
-        inv.loadInv(ps, player).then((e) => {
+      inv.saveInv(currentInv, player).then(() =>
+        inv.loadInv(ps, player).then(() => {
           player.runCommand(`scoreboard players set @s ${objectives[0]} ${ps}`);
           SA.Build.entity.tp(
             player,
             pos,
             place,
             po.Q("title:spawn:enable", player),
-            obj
+            obj, null, air
           );
         })
       );
@@ -397,7 +421,7 @@ export function Atp(player, place, ignorepvp, ignorebr, ignorequene, setDefaultI
         pos,
         place,
         po.Q("title:spawn:enable", player),
-        obj
+        obj, null, air
       );
     }
   }
@@ -409,68 +433,72 @@ scores.objective = objectives[0];
 scores.minScore = 1;
 scores.maxScore = 1;
 qqq.scoreOptions = [scores];
-SA.Utilities.time.setTickInterval(() => {
-  for (const p of world.getPlayers())
-    try {
-      p.runCommand(
-        "execute as @s if block ~~-2~ bedrock if block ~~-3~ chest run event entity @s portal"
-      );
-    } catch (ee) {}
-  const pos = wo
-    .Q("spawn:pos")
-    ?.split(" ")
-    ?.map((e) => (e = Number(e)));
-  const pos2 = wo
-    .Q("minigames:pos")
-    ?.split(" ")
-    ?.map((e) => (e = Number(e)));
-  for (const pl of world.getPlayers(qqq)) {
-    if (
-      pos &&
-      SA.Build.entity.getScore(pl, "inv") == 1 &&
-      !SA.Build.entity.hasItem(pl, "armor.chest", "elytra") &&
-      pl.location.y < pos[1] - 10
-    ) {
+SA.Utilities.time.setTickInterval(
+  () => {
+    for (const p of world.getPlayers())
       try {
-        pl.runCommand(
-          `execute positioned ${wo.Q("spawn:pos")} run testfor @a[name="${
-            pl.name
-          }",r=50]`
+        p.runCommand(
+          "execute as @s if block ~~-2~ bedrock if block ~~-3~ chest run event entity @s portal"
         );
-        Atp(pl, "spawn", true);
-      } catch (e) {}
-    } else {
-      try {
-        pl.runCommand(
-          `execute positioned ${wo.Q("spawn:pos")} run testfor @a[name="${
-            pl.name
-          }",r=200]`
-        );
-        if (pl.location.y < pos[1] - 50) Atp(pl, "spawn", true);
-      } catch (e) {}
-      try {
-        pl.runCommand(
-          `execute positioned ${wo.Q("spawn:pos")} run testfor @a[name="${
-            pl.name
-          }",rm=200,r=210]`
-        );
-        Atp(pl, "spawn", true);
-      } catch (e) {}
+      } catch (ee) {}
+    const pos = wo
+      .Q("spawn:pos")
+      ?.split(" ")
+      ?.map((e) => (e = Number(e)));
+    const pos2 = wo
+      .Q("minigames:pos")
+      ?.split(" ")
+      ?.map((e) => (e = Number(e)));
+    for (const pl of world.getPlayers(qqq)) {
+      if (
+        pos &&
+        SA.Build.entity.getScore(pl, "inv") == 1 &&
+        !SA.Build.entity.hasItem(pl, "armor.chest", "elytra") &&
+        pl.location.y < pos[1] - 10
+      ) {
+        try {
+          pl.runCommand(
+            `execute positioned ${wo.Q("spawn:pos")} run testfor @a[name="${
+              pl.name
+            }",r=50]`
+          );
+          Atp(pl, "spawn", true);
+        } catch (e) {}
+      } else {
+        try {
+          pl.runCommand(
+            `execute positioned ${wo.Q("spawn:pos")} run testfor @a[name="${
+              pl.name
+            }",r=200]`
+          );
+          if (pl.location.y < pos[1] - 50) Atp(pl, "spawn", true);
+        } catch (e) {}
+        try {
+          pl.runCommand(
+            `execute positioned ${wo.Q("spawn:pos")} run testfor @a[name="${
+              pl.name
+            }",rm=200,r=210]`
+          );
+          Atp(pl, "spawn", true);
+        } catch (e) {}
+      }
+      if (pos2 && pl.location.y < pos2[1] - 10) {
+        try {
+          pl.runCommand(
+            `execute positioned ${wo.Q("minigames:pos")} run testfor @a[name="${
+              pl.name
+            }",r=50]`
+          );
+          Atp(pl, "minigames", true);
+        } catch (e) {}
+      }
     }
-    if (pos2 && pl.location.y < pos2[1] - 10) {
-      try {
-        pl.runCommand(
-          `execute positioned ${wo.Q("minigames:pos")} run testfor @a[name="${
-            pl.name
-          }",r=50]`
-        );
-        Atp(pl, "minigames", true);
-      } catch (e) {}
-    }
-  }
-  for (const obj of objectives)
-    SA.Build.chat.runCommand(`scoreboard objectives add ${obj} dummy`);
-}, 0, 'portals');
+    for (const obj of objectives)
+      SA.Build.chat.runCommand(`scoreboard objectives add ${obj} dummy`);
+  },
+  0,
+  "portals"
+);
 
 world.events.beforeDataDrivenEntityTriggerEvent.subscribe((data) => {
   if (data.id != "portal") return;
@@ -501,12 +529,15 @@ world.events.beforeDataDrivenEntityTriggerEvent.subscribe((data) => {
         poo,
         i.getLore()[2],
         po.Q("title:spawn:enable", data.entity),
-        {on: false},
+        { on: false },
         i.getLore()[3]
       );
       break;
     case "trigger":
-      SA.Exceptions.E.triggerEvent(i.getLore()[1], {player: data.entity, item: i})
+      SA.Exceptions.E.triggerEvent(i.getLore()[1], {
+        player: data.entity,
+        item: i,
+      });
       break;
     default:
       Atp(data.entity, i.getLore()[0]);
@@ -626,19 +657,37 @@ new SA.Command(
     wo.set("anarch:pos", rl);
   });
 
-  new SA.Command({name: 'portal', aliases: ['port'], description: 'Ставит портал', tags: ['owner']}).addOption("addOrSet", "boolean").addOption("lore", "string")
+new SA.Command({
+  name: "portal",
+  aliases: ["port"],
+  description: "Ставит портал",
+  tags: ["owner"],
+})
+  .addOption("addOrSet", "boolean")
+  .addOption("lore", "string")
   .executes((ctx) => {
-    let item = new ItemStack(MinecraftItemTypes.grayCandle, 1, 0)
+    let item = new ItemStack(MinecraftItemTypes.grayCandle, 1, 0);
     item.setLore(ctx.args.slice(1));
-    const q = ctx.args[0] == 'true'
-    const block = ctx.sender.dimension.getBlock(SA.Build.entity.locationToBlockLocation(ctx.sender.location).offset(0, q? -3 : -4, 0))
-    block.setType(MinecraftBlockTypes.chest)
-    block
-      .getComponent("inventory")
-      .container.setItem(0, item);
-    const loc =SA.Build.entity.locationToBlockLocation(ctx.sender.location).offset(0, 1, 0)
-    const l = new Location(loc.x + 0.5 , loc.y, loc.z+ 0.5)
-    if (q) ctx.sender.teleport(l, ctx.sender.dimension, ctx.sender.rotation.x, ctx.sender.rotation.y, false)
-    ctx.reply(`§f► ${ctx.args.slice(1).join('§r, ')}`);
-    ctx.sender.runCommand('setblock ~~-3~ bedrock')
+    const q = ctx.args[0] == "true";
+    const block = ctx.sender.dimension.getBlock(
+      SA.Build.entity
+        .locationToBlockLocation(ctx.sender.location)
+        .offset(0, q ? -3 : -4, 0)
+    );
+    block.setType(MinecraftBlockTypes.chest);
+    block.getComponent("inventory").container.setItem(0, item);
+    const loc = SA.Build.entity
+      .locationToBlockLocation(ctx.sender.location)
+      .offset(0, 1, 0);
+    const l = new Location(loc.x + 0.5, loc.y, loc.z + 0.5);
+    if (q)
+      ctx.sender.teleport(
+        l,
+        ctx.sender.dimension,
+        ctx.sender.rotation.x,
+        ctx.sender.rotation.y,
+        false
+      );
+    ctx.reply(`§f► ${ctx.args.slice(1).join("§r, ")}`);
+    ctx.sender.runCommand("setblock ~~-3~ bedrock");
   });
