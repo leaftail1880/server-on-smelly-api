@@ -16,7 +16,7 @@ import {
 } from "mojang-minecraft";
 import { po, wo, WorldOption } from "../../app/Models/Options.js";
 import { parseLocationAugs } from "../../app/Utilities/formatter.js";
-import { SA } from "../../index.js";
+import { log, SA } from "../../index.js";
 import { rd } from "../Airdrops/index.js";
 import { quene } from "../Battle Royal/index.js";
 import { stats } from "../Private/private.js";
@@ -106,7 +106,8 @@ class inventory {
    * @returns
    */
   async saveInv(i, pl) {
-    if (i != invs.anarch) return;
+    const inv = SA.Build.entity.getI(pl)
+    if (i != invs.anarch || inv.size == inv.emptySlotsCount) return;
     //console.warn("Сохранение инвентаря, старт");
     this.#gamerules(true);
     const zone = this.savezones.find(
@@ -302,6 +303,7 @@ export function Atp(
   ignorequene,
   setDefaultInventory
 ) {
+  log(`Atp ${place} ${ignorepvp}`)
   if (!ignorebr && SA.Build.entity.getTagStartsWith(player, "locktp:"))
     return player.runCommand(
       `tellraw @s {"rawtext":[{"translate":"§c► Сейчас это запрещено (префикс запрета: ${SA.Build.entity.getTagStartsWith(
@@ -371,12 +373,13 @@ export function Atp(
       y = 200;
     }
     pos = x + " " + y + " " + z;
-
   }
 
   if (ps == invs.anarch) {
     SA.Build.chat.broadcast(
-      `§r§${air ? "5Воздух" : "9Земля"}§r ${po.Q('anarchy:hideCoordinates', player) ? "" : pos}`,
+      `§r§${air ? "5Воздух" : "9Земля"}§r ${
+        po.Q("anarchy:hideCoordinates", player) ? "" : pos
+      }`,
       player.name
     );
   }
@@ -395,9 +398,17 @@ export function Atp(
   if (
     (currentInv == ps ||
       (inve.size == inve.emptySlotsCount && place != "anarch")) &&
-    !setDefaultInventory
+    !((!setDefaultInventory && inve.size == inve.emptySlotsCount) || setDefaultInventory)
   ) {
-    SA.Build.entity.tp(player, pos, place, po.Q("title:spawn:enable", player), null, null, air);
+    SA.Build.entity.tp(
+      player,
+      pos,
+      place,
+      po.Q("title:spawn:enable", player),
+      null,
+      null,
+      air
+    );
     player.runCommand(`scoreboard players set @s ${objectives[0]} ${ps}`);
   } else {
     try {
@@ -410,7 +421,10 @@ export function Atp(
             pos,
             place,
             po.Q("title:spawn:enable", player),
-            obj, null, air
+            obj,
+            null,
+            air,
+            (!setDefaultInventory && inve.size == inve.emptySlotsCount) || place == 'currentpos'
           );
         })
       );
@@ -421,7 +435,9 @@ export function Atp(
         pos,
         place,
         po.Q("title:spawn:enable", player),
-        obj, null, air
+        obj,
+        null,
+        air
       );
     }
   }

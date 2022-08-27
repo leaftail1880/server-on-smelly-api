@@ -300,8 +300,8 @@ export class EntityBuilder {
    * @returns void
    * @example tp(player, '0 0 0', 'spawn', po.Q('tp', player))
    */
-  tp(player, pos, place, resultActionbar = false, obj, text, slow_falling) {
-    try {
+  tp(player, pos, place, resultActionbar = false, obj, text, slow_falling, tpAnimation = true) {
+    if (tpAnimation) try {
       player.runCommand("effect @s clear");
     } catch (e) {}
     if (slow_falling) player.runCommand("effect @s slow_falling 17 1 true")

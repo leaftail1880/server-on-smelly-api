@@ -2,12 +2,6 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "command": "npm start",
-      "name": "Run npm start",
-      "request": "launch",
-      "type": "node-terminal"
-    },
-    {
       "type": "minecraft-js",
       "request": "attach",
       "name": "/script debugger connect localhost 1000",
@@ -17,3 +11,9 @@
     }
   ]
 }
+/*
+
+/script debugger connect localhost 1000
+
+
+*/

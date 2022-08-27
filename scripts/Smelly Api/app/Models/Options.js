@@ -199,7 +199,7 @@ export class WorldOption {
    * @param {string} desc Описание
    * @param {number} lvl Уровень разрешений
    * @returns {void}
-   * @example new option('JS:enable', 'Ниче не делает', 10)
+   * @example new option('LOL:enable', 'Описулька', true)
    */
   constructor(name, desc = null, IsTextOption = false, permissionLvL = 0) {
     if (!wo.E(name)) {
@@ -255,7 +255,8 @@ class WO {
    * @return {boolean | string}
    * @example QQ('JS:enable')
    */
-     QQ(option, returnfalse = true) {
+     QQ(option, returnfalse = true, IsTextOption) {
+      if (IsTextOption) return db.get(option)
       if (light_db.get(option) != 0) return true;
       if (db.get(option)) return true;
       if (returnfalse) return false;

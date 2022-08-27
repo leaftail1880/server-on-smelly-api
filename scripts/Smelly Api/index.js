@@ -142,3 +142,9 @@ try {
     SA.Build.chat.broadcast("емае скрипт крашнулся");
   });
 } catch (error) {}
+
+export function log(msg) {
+  const d = new Date()
+  d.setHours(d.getHours()+3)
+  SA.Build.chat.broadcast(`§8[log][${d.toLocaleTimeString('ru-RU')}]§7 ${msg}`)
+}

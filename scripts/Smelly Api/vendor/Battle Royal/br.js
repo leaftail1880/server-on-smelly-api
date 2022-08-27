@@ -420,7 +420,7 @@ class BattleRoyal {
     for (const key of Object.keys(this.events)) {
       world.events[key].unsubscribe(this.events[key]);
     }
-    // Бесполезная чепуха
+    // Чепуха
     // SA.tables.chests.values().forEach((e) => {
     //   for (const p of e) {
     //     if (typeof p == "string") {
@@ -443,6 +443,10 @@ class BattleRoyal {
     //     }
     //   }
     // });
+
+    //Альтернативная чепуха
+    SA.tables.chests.clear()
+
     const q = new EntityQueryOptions();
     q.type = "minecraft:item";
     for (const p of world.getDimension("overworld").getEntities(q)) {
@@ -460,20 +464,20 @@ class BattleRoyal {
       if (l.z <= rmin.z && l.x <= rmin.x && l.x <= rmax.x && l.x >= rmin.x)
         p.kill();
     }
-    SA.tables.chests.keys().forEach((e) => {
-      const l = e.split(" ").map((e) => Number(e));
-      /**
-       * @type {BlockInventoryComponentContainer}
-       */
-      const inv = world
-        .getDimension("overworld")
-        .getBlock(new BlockLocation(l[0], l[1], l[2]))
-        .getComponent("inventory").container;
-      for (let i = 0; i <= inv.size; i++) {
-        inv.setItem(i, new ItemStack(MinecraftItemTypes.air, 1, 0));
-      }
-      SA.tables.chests.set(e, false);
-    });
+    // SA.tables.chests.keys().forEach((e) => {
+    //   const l = e.split(" ").map((e) => Number(e));
+    //   /**
+    //    * @type {BlockInventoryComponentContainer}
+    //    */
+    //   const inv = world
+    //     .getDimension("overworld")
+    //     .getBlock(new BlockLocation(l[0], l[1], l[2]))
+    //     .getComponent("inventory").container;
+    //   for (let i = 0; i <= inv.size; i++) {
+    //     inv.setItem(i, new ItemStack(MinecraftItemTypes.air, 1, 0));
+    //   }
+    //   SA.tables.chests.set(e, false);
+    // });
     this.players = [];
     this.reward = 0;
     this.pos = { x: 256, z: 256 };

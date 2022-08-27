@@ -26,7 +26,7 @@ import { po, wo, wow } from "../../app/Models/Options.js";
  *========================**/
 import { P } from "../../config/particles.js";
 import { S } from "../../config/sounds.js";
-import { SA } from "../../index.js";
+import { log, SA } from "../../index.js";
 
 /**======================
  **       PLUGINS
@@ -891,7 +891,11 @@ world.events.entityHurt.subscribe((data) => {
     SA.Build.entity.getTagStartsWith(data.hurtEntity, "lockpvp:")
   )
     return;
+  let lastHit = false
+  if (data.damage >= data.hurtEntity.getComponent("minecraft:health").current) lastHit = true
   if (data?.damagingEntity?.id == "minecraft:player") {
+
+    //Всякая фигня без порядка
     SA.Build.chat.runCommand(`scoreboard objectives add pvp dummy`);
     data.damagingEntity.runCommand(
       `scoreboard players set @s pvp ${
@@ -899,19 +903,23 @@ world.events.entityHurt.subscribe((data) => {
       }`
     );
     stats.Hgive.Eadd(data.damagingEntity, data.damage);
+    if (lastHit) stats.kills.Eadd(data.damagingEntity, 1);
+
+    //Если лук, визуализируем
     if (data.cause == "projectile" && wo.Q("server:bowhit")) {
       if (po.Q("pvp:bowhitsound", data.damagingEntity))
         data.damagingEntity.runCommand(
           `playsound block.end_portal_frame.fill @s ~~~ 1 ${data.damage / 2}`
         );
       if (po.Q("pvp:bowhittitle", data.damagingEntity)) {
-        data.damagingEntity.onScreenDisplay.setActionBar(`§c-${data.damage}♥`);
+        lastHit ? data.damagingEntity.onScreenDisplay.setActionBar(SA.Lang.lang["title.kill.bow"](data.hurtEntity.name)) : data.damagingEntity.onScreenDisplay.setActionBar(`§c-${data.damage}♥`);
         SA.Build.chat.runCommand(`scoreboard objectives add lockedtitle dummy`);
         data.damagingEntity.runCommand(
           "scoreboard players set @s lockedtitle 2"
         );
       }
     }
+    if (data.cause != 'projectile' && lastHit) data.damagingEntity.onScreenDisplay.setActionBar(SA.Lang.lang["title.kill.hit"](data.hurtEntity.name)) 
   }
   if (data?.hurtEntity?.id != "minecraft:player") return;
   SA.Build.chat.runCommand(`scoreboard objectives add pvp dummy`);

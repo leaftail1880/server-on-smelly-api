@@ -2,6 +2,19 @@ import { world } from "mojang-minecraft";
 import { PlayerOption, po, wo, WorldOption } from "../../app/Models/Options.js";
 import { SA } from "../../index.js";
 
+
+new WorldOption(
+  'simulatedplayer:name',
+  "имя ботика", true
+);
+
+new WorldOption(
+  'simulatedplayer:time',
+  "время за компом у ботика", true
+);
+
+new PlayerOption('anarchy:hideCoordinates', 'Скрывает координаты при телепортации на анархию')
+
 new WorldOption('import:br', 'Включает плагин батл рояля')
 
 new WorldOption("perm:владельцы", 'Ники владельцев через ", "', true);
@@ -34,7 +47,6 @@ new PlayerOption(
 new PlayerOption("another:join:disable", '§cВыключает§r чужие сообщения о входе')
 new PlayerOption("joinsound:disable", '§cВыключает§r звук входа')
 
-new PlayerOption('anarchy:hideCoordinates', 'Скрывает координаты при телепортации на анархию')
 
 new WorldOption(
   "lock:nether",
