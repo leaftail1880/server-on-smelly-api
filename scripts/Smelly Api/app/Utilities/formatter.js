@@ -20,7 +20,7 @@ export function rainbowText(text) {
     "§3",
     "§9",
     "§5",
-    "§d",
+    "§d",//§r
   ];
   const letter = text.replace(/§./g, "").split("");
   let newMessage = "",

@@ -174,7 +174,7 @@ export class LeaderboardBuilder {
         )}§r\n`;
       }
 
-      entity.nameTag = `§l§${style.name}${
+      entity.nameTag = `§l§${style.name}${//§r
         name.charAt(0).toUpperCase() + name.slice(1)
       }\n§l§${style.color1}-§${style.color2}-§${style.color1}-§${
         style.color2
