@@ -13,13 +13,13 @@ import { SHAPES } from "../../vendor/World Edit/modules/definitions/shapes.js";
 export function getPlace(place, text) {
   //Place, prefix symbol color, rotation
   let P, C, rot;
-  if (place == "anarch") (P = "§cАнархия"), (C = "4")
+  if (place == "anarch") (P = "§cАнархия"), (C = "4");
   if (place == "spawn") (P = "§aСпавн"), (C = "2"), (rot = "0 0");
   if (place == "br") (P = "§6Батл рояль"), (C = "e"), (rot = "0 0");
   if (place == "minigames" || place == "currentpos")
     (P = "§dМиниигры§r"), (C = "5"), (rot = "0 0");
   if (!P) (P = place), (C = text);
-  return {P, C, rot}
+  return { P, C, rot };
 }
 
 export class EntityBuilder {
@@ -126,10 +126,9 @@ export class EntityBuilder {
    */
   getScore(entity, objective) {
     try {
-      const command = entity.runCommand(
-        `scoreboard players test @s "${objective}" * *`
-      );
-      return parseInt(String(command.statusMessage?.split(" ")[1]), 10);
+      return world.scoreboard
+        .getObjective(objective)
+        .getScore(entity.scoreboard);
     } catch (error) {
       return 0;
     }
@@ -300,22 +299,36 @@ export class EntityBuilder {
    * @returns void
    * @example tp(player, '0 0 0', 'spawn', po.Q('tp', player))
    */
-  tp(player, pos, place, resultActionbar = false, obj, text, slow_falling, tpAnimation = true) {
-    if (tpAnimation) try {
-      player.runCommand("effect @s clear");
-    } catch (e) {}
-    if (slow_falling) player.runCommand("effect @s slow_falling 17 1 true")
-    let befplace
+  tp(
+    player,
+    pos,
+    place,
+    resultActionbar = false,
+    obj,
+    text,
+    slow_falling,
+    tpAnimation = true
+  ) {
+    if (tpAnimation)
+      try {
+        player.runCommand("effect @s clear");
+      } catch (e) {}
+    if (slow_falling) player.runCommand("effect @s slow_falling 17 1 true");
+    let befplace;
     if (obj && obj.on) {
-      let {P, C} = getPlace(obj.place, '')
-      befplace = `§${C}◙ §3${P}§r > `
+      let { P, C } = getPlace(obj.place, "");
+      befplace = `§${C}◙ §3${P}§r > `;
     }
-    
-    let {P, C, rot} = getPlace(place, text)
-    player.runCommand(`tp ${pos}${rot != undefined ? ` ${rot}` : ''}`);
+
+    let { P, C, rot } = getPlace(place, text);
+    player.runCommand(`tp ${pos}${rot != undefined ? ` ${rot}` : ""}`);
     if (resultActionbar)
       player.runCommand(`title @s actionbar §${C}◙ §3${P} §${C}◙§r`);
-    player.runCommand(`tellraw @s {"rawtext":[{"translate":"${befplace?befplace:''}§${C}◙ §3${P}"}]}`);
+    player.runCommand(
+      `tellraw @s {"rawtext":[{"translate":"${
+        befplace ? befplace : ""
+      }§${C}◙ §3${P}"}]}`
+    );
   }
   /**
    * Gets the inventory of a entity

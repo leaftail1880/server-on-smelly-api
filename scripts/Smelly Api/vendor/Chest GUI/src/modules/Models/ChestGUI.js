@@ -525,6 +525,126 @@ export const ACTIONS1 = {
     console.warn("lol, temp runned");
   },
 
+  openPlayerMenu: (his, item) => {
+    const form = new ModalFormData();
+    form.title("§l§f" + SA.Utilities.format.clearColors(item.name) + "§r");
+    //form.textField('Введи значение:', 'значение', wo.Q(SA.Utilities.format.clearColors(item.name)) ? wo.Q(SA.Utilities.format.clearColors(item.name)) : undefined)
+    form.dropdown(
+      "Уровень разрешений:",
+      [
+        "Участник",
+        "§9Модер§r (команды, OP)",
+        "§6Админ§r (команды, OP, настройки)",
+      ],
+      SA.Build.entity.getScore(
+        SA.Build.entity.fetch(SA.Utilities.format.clearColors(item.name)),
+        "perm"
+      )
+    );
+    OpenForm(his, his.player, form, (res) => {
+      if (!res.isCanceled) {
+        switch (res.formValues[0]) {
+          case 0:
+            /**
+             * @type {Array<String>}
+             */
+            let list1 = wo.Q("perm:владельцы").split(", ");
+            let list2 = wo.Q("perm:модеры").split(", ");
+            let list11 = [];
+            let list22 = [];
+            list1.forEach((e) => {
+              if (e != SA.Utilities.format.clearColors(item.name))
+                list11.push(e);
+            });
+            list2.forEach((e) => {
+              if (e != SA.Utilities.format.clearColors(item.name))
+                list22.push(e);
+            });
+            wo.set("perm:владельцы", list11.join(", "));
+            wo.set("perm:модеры", list22.join(", "));
+            SA.Build.chat.broadcast(
+              `► ${SA.Utilities.format.clearColors(
+                item.name
+              )} теперь обычный игрок`
+            );
+            break;
+          case 1:
+            let ist1 = wo.Q("perm:владельцы").split(", ");
+            let ist2 = wo.Q("perm:модеры").split(", ");
+            ist2.push(SA.Utilities.format.clearColors(item.name));
+            let ist11 = [];
+            ist1.forEach((e) => {
+              if (e != SA.Utilities.format.clearColors(item.name))
+                ist11.push(e);
+            });
+            wo.set("perm:владельцы", ist11.join(", "));
+            wo.set("perm:модеры", ist2.join(", "));
+            SA.Build.chat.broadcast(
+              `§9►§f ${SA.Utilities.format.clearColors(
+                item.name
+              )} назначен §9Модером`
+            );
+            break;
+          case 2:
+            let st1 = wo.Q("perm:владельцы").split(", ");
+
+            st1.push(SA.Utilities.format.clearColors(item.name));
+
+            let st2 = wo.Q("perm:модеры").split(", ");
+
+            let st22 = [];
+
+            st2.forEach((e) => {
+              if (e != SA.Utilities.format.clearColors(item.name))
+                st22.push(e);
+            });
+
+            wo.set("perm:владельцы", st1.join(", "));
+
+            wo.set("perm:модеры", st22.join(", "));
+
+            SA.Build.chat.broadcast(
+              `§6►§f ${SA.Utilities.format.clearColors(
+                item.name
+              )} назначен §6Админом§r`
+            );
+            break;
+        }
+      }
+      SA.Build.chat.broadcast(res.formValues);
+    });
+  },
+  open: (his, item) => {
+    const form = new ModalFormData();
+    form.title("§l§f" + SA.Utilities.format.clearColors(item.name) + "§r");
+    form.textField(
+      "Введи значение:",
+      "значение",
+      wo.Q(SA.Utilities.format.clearColors(item.name))
+        ? wo.Q(SA.Utilities.format.clearColors(item.name))
+        : undefined
+    );
+    OpenForm(his, his.player, form, (res) => {
+      if (!res.isCanceled) {
+        wo.set(SA.Utilities.format.clearColors(item.name), res.formValues[0]);
+        SA.Build.chat.broadcast(res.formValues[0]);
+      }
+    });
+  },
+  give2: (his, item) => {
+    console.warn("give2");
+    const form = new ActionFormData();
+    form.button("Удалить");
+    form.button("Оставить");
+    form.body("Удалить предмет из базы данных после сбора?");
+    form.title("Ответь");
+    OpenForm(his, his.player, form, (res) => {
+      if (!res.isCanceled) {
+        console.warn(res.formValues[0]);
+      }
+    });
+  },
+
   give: (his, item) => GiveAction(his, item),
   lbs: (his, item) => {
     const form = new ModalFormData();
@@ -576,7 +696,6 @@ export const ACTIONS1 = {
       ent.nameTag = data.formValues[0];
     });
   },
-
   "spawn:ft": (his, item) => {
     const form = new ModalFormData();
     form.title("§l§fЛетающий текст§r");
@@ -680,16 +799,63 @@ export const ACTIONS1 = {
         stats.Hgive.Eget(his.player),
         stats.Bplace.Eget(his.player),
         stats.Bbreak.Eget(his.player),
-        stats.FVlaunc.Eget(his.player),
+        stats.FVlaunc.Eget(his.player)
       )
     );
     OpenForm(his, his.player, form);
   },
 };
 
+
+
 const STARTACTIONS1 = {
   "": (his, item) => {
+    let a = item.action.split(":")[1];
+    if (a == "clear") {
+      light_db.reset();
+      let count = 0;
+      for (let item of his.mapInventory) {
+        if (wo.E(SA.Utilities.format.clearColors(item.item.nameTag)).text) {
+          count++;
+          if (count >= WORLDOPTIONS.length) break;
+          continue;
+        }
+        let nei = {
+          lore: item.item.getLore(),
+          name: item.item.nameTag,
+        };
+        SetAction(
+          his,
+          nei,
+          count,
+          new ItemStack(
+            MinecraftItemTypes.redCandle,
+            item.item.amount,
+            item.item.data
+          )
+        );
+        auxa.createItem(
+          count,
+          "minecraft:red_candle",
+          item.item.amount,
+          item.item.data,
+          "change",
+          item.item.nameTag,
+          item.item.getLore()
+        );
+        count++;
+        if (count >= WORLDOPTIONS.length) break;
+      }
+    }
+    if (a == "clear0") light_db.reset0();
+    SetAction(his, item, slot, itemStack);
+  },
+
+  "sc:": (his, item) => {
     console.warn("lol, empty runned");
+  },
+  "change:": (his, item, slot) => {
+    ChangeAction(his, item, slot);
   },
   /**
    *
@@ -750,7 +916,7 @@ const STARTACTIONS1 = {
   "page:": (his, item) => PageAction(his, item),
   "Atp:": (his, item, change) => {
     SetAction(his, item, change.slot, change.item);
-    his.killa().then((e) => Atp(his.player, item.action.split(":")[1]));
+    his.killa().then(() => Atp(his.player, item.action.split(":")[1]));
   },
 };
 
@@ -793,7 +959,6 @@ export class ChestGUI {
     GUIid = null,
     GUIpage = null
   ) {
-    co("§bnew §9ChestGUI§f() {");
     this.player = player;
     this.entity = entity;
     this.previousMap = null;
@@ -847,14 +1012,12 @@ export class ChestGUI {
     };
 
     CURRENT_GUIS[this.player.name] = this;
-    co("}");
   }
 
   /**
    * This spawns a chest GUI entity and sets the this.entity
    */
   summon() {
-    co("§9summon§f() {");
     SA.Models.world
       .getEntitys(ENTITY_INVENTORY)
       ?.find((e) => e.getTags().includes(`${this.id}:${this.player.name}`))
@@ -862,29 +1025,19 @@ export class ChestGUI {
     let e = world.events.entityCreate.subscribe((data) => {
       if (data.entity.id == ENTITY_INVENTORY) {
         this.entity = data.entity;
-        this.entity.addTag(`id:${this.player.name}`);
+        this.entity.addTag(`${this.id}:${this.player.name}`);
         this.entity.addTag(`gui`);
         this.setPage(this.p);
       }
       world.events.entityCreate.unsubscribe(e);
     });
     this.player.triggerEvent("smelly:spawn_inventory");
-    co("}");
-  }
-
-  /**
-   * Reloads this chect GUI
-   */
-  reload() {
-    this.entity.triggerEvent("despawn");
-    this.summon();
   }
 
   /**
    * Kills this chestGUI and removes all events
    */
   kill(data = null) {
-    co("§ckill§f()§r");
     if (data) console.warn(data);
     let suc = false;
     try {
@@ -934,7 +1087,7 @@ export class ChestGUI {
    * Sets a container to specific page
    * @param {Number | String} page page of const PAGES
    */
-  setPage(id) {
+  setPage(id, extras = null) {
     /**
      * @type {Page}
      */
@@ -996,11 +1149,17 @@ export class ChestGUI {
           "lbs"
         );
     }
+
+    if (page.fillType == "players") {
+      PlayerFill.fill(this.entity, page);
+    }
+    if (page.fillType == "items") {
+      Itemss.fill(this.entity, extras);
+    }
+
     this.page = page;
     this.previousMap = this.mapInventory;
     this.entity.nameTag = `size:${page.size}` ?? "size:27";
-    // entity.triggerEvent(`size:${page.size}`);
-    co("}");
   }
 
   /**
@@ -1042,7 +1201,8 @@ export class ChestGUI {
       this.setPage(
         this.page.id == "lich"
           ? PAGES["forplayer:" + this.player] ?? this.page.id
-          : this.page.id
+          : this.page.id,
+        item
       );
     } else {
       co("On page item id: " + item.type);
@@ -1094,380 +1254,4 @@ export class ChestGUI {
   /*runItemAction(item, slot, itemStack) {
 
   }*/
-}
-
-/**
- * This is a object showing players chestGUI to entity
- * @type {Object<string, ChestGUI2>}
- */
-export const CURRENT_GUIS2 = {};
-
-export class ChestGUI2 {
-  /**
-   * Finds and returns a slot change in a inventory
-   * @param {Array<MappedInventoryItem>} oldInv
-   * @param {Array<MappedInventoryItem>} newInv
-   * @returns {SlotChangeReturn | null}
-   */
-  static getSlotChange(oldInv, newInv) {
-    if (oldInv.length != newInv.length) return null;
-    for (let i = 0; i < oldInv.length; i++) {
-      if (oldInv[i].uid != newInv[i].uid)
-        return { slot: i, item: oldInv[i].item };
-    }
-    return null;
-  }
-
-  /**
-   * Creates a new chestGUI and assigns it to a player
-   * @param {Player} player the player this chestGUI is asigned to
-   * @param {Entity} entity entity to use if undefined will create one
-   */
-  constructor(player, entity = null) {
-    this.player = player;
-    this.entity = entity;
-    this.previousMap = null;
-    /**
-     * @type {Page}
-     */
-    this.page = null;
-    if (!this.entity) this.summon();
-
-    this.events = {
-      tick: world.events.tick.subscribe(() => {
-        try {
-          if (this.entity.getComponent("minecraft:health").current <= 0)
-            return this.kill();
-        } catch (error) {
-          this.kill();
-        }
-        if (SA.Models.entity.getHeldItem(this.player)?.id != GUI_ITEM2)
-          return this.kill();
-
-        this.entity.teleport(this.player.location, this.player.dimension, 0, 0);
-
-        if (!this.player.hasTag(`has_container_open`)) return;
-        if (!this.previousMap) return;
-        const change = ChestGUI2.getSlotChange(
-          this.previousMap,
-          this.mapInventory
-        );
-        if (change == null) return;
-        this.onSlotChange(change);
-      }),
-      playerLeave: world.events.playerLeave.subscribe(({ playerName }) => {
-        if (playerName != this.player.name) return;
-        this.kill();
-      }),
-    };
-
-    CURRENT_GUIS2[this.player.name] = this;
-  }
-
-  /**
-   * This spawns a chest GUI entity and sets the this.entity
-   */
-  summon() {
-    SA.Models.world
-      .getEntitys(ENTITY_INVENTORY)
-      ?.find((e) => e.getTags().includes(`id2:${this.player.name}`))
-      ?.triggerEvent("despawn");
-    let e = world.events.entityCreate.subscribe((data) => {
-      if (data.entity.id == ENTITY_INVENTORY) {
-        this.entity = data.entity;
-        this.entity.addTag(`id2:${this.player.name}`);
-        this.entity.addTag(`gui`);
-        this.setPage(DEFAULT_STATIC_PAGE_ID2);
-      }
-      world.events.entityCreate.unsubscribe(e);
-    });
-    this.player.triggerEvent("smelly:spawn_inventory");
-  }
-
-  /**
-   * Reloads this chect GUI
-   */
-  reload() {
-    this.entity.triggerEvent("despawn");
-    this.summon();
-  }
-
-  /**
-   * Kills this chestGUI and removes all events
-   */
-  kill() {
-    try {
-      this.entity.triggerEvent("despawn");
-      for (const key in this.events) {
-        world.events[key].unsubscribe(this.events[key]);
-      }
-      delete CURRENT_GUIS2[this.player.name];
-    } catch (error) {
-      console.warn(error + error.stack);
-    }
-  }
-
-  /**
-   * Sets a container to specific page
-   * @param {Number | String} page page number its the index of const PAGES
-   * @param {String} extras stuff that needs to be passed into this page
-   */
-  setPage(id, extras = null) {
-    /**
-     * @type {Page}
-     */
-    const page = PAGES[id];
-    if (!page) SA.Build.chat.broadcast(`Страницы ${id} нет`);
-    if (page.fillType == "default") {
-      DefaultFill.fill(this.entity, page);
-    }
-
-    if (page.fillType == "players") {
-      PlayerFill.fill(this.entity, page);
-    }
-    if (page.fillType == "items") {
-      Itemss.fill(this.entity, extras);
-    }
-    this.page = page;
-    this.previousMap = this.mapInventory;
-    this.entity.nameTag = `size:${page.size}` ?? "size:27";
-    // entity.triggerEvent(`size:${page.size}`);
-  }
-
-  /**
-   * Gets a entitys inventory but with mapped data
-   * @returns {Array<MappedInventoryItem>}
-   */
-  get mapInventory() {
-    let container = this.entity.getComponent("inventory").container;
-    let inventory = [];
-
-    for (let i = 0; i < container.size; i++) {
-      let currentItem = container.getItem(i);
-
-      inventory.push({
-        uid: getItemUid(currentItem),
-        item: currentItem,
-      });
-    }
-
-    this.previousMap = inventory;
-    return inventory;
-  }
-
-  /**
-   * This runs when a slot gets changed in the chest inventory
-   * @param {SlotChangeReturn} change slot that was changed
-   */
-  onSlotChange(change) {
-    /**
-     * The guiItem that was changed
-     * @type {import("./Page.js").Item}
-     */
-    const item = this.page.items[change.slot];
-    if (!item) {
-      // item was added to page
-      //console.warn('added')
-      this.setPage(this.page.id, item);
-    } else {
-      //console.warn(item.action)
-      // item was taken from this page
-      try {
-        // console.warn(`itemStack: ${change.item.id}`);
-        // change.item.nameTag = "boiiiiii";
-        this.player.runCommand(
-          `clear @s ${item.type} ${item.data} ${item.amount}`
-        );
-      } catch (error) {
-        // the item couldnt be cleared that means
-        // they now have a item witch is really BAD
-        const q = new EntityQueryOptions();
-        (q.type = "minecraft:item"), (q.location = this.player.location);
-        q.maxDistance = 2;
-        [...this.player.dimension.getEntities(q)].forEach((e) => e.kill());
-      }
-      this.runItemAction(item, change.slot, change.item);
-    }
-
-    this.previousMap = this.mapInventory;
-  }
-
-  /**
-   * Runs a item action when its grabbed out of a container
-   * @param {string} item item that was grabbed
-   * @param {number} slot slot the item was grabbed from
-   * @param {ItemStack} itemStack the itemStack that was grabbed
-   */
-  runItemAction(item, slot, itemStack) {
-    if (item.action == "give") {
-      console.warn("give");
-      GiveAction(this, item);
-    } else if (item.action.startsWith("page:")) {
-      PageAction(this, item);
-    } else if (item.action == "give2") {
-      console.warn("give2");
-      const form = new ActionFormData();
-      form.button("Удалить");
-      form.button("Оставить");
-      form.body("Удалить предмет из базы данных после сбора?");
-      form.title("Ответь");
-      OpenForm(this, this.player, form, (res) => {
-        if (!res.isCanceled) {
-          console.warn(res.formValues[0]);
-        }
-      });
-    } else if (item.action.startsWith("command:")) {
-      CommandAction(this, item);
-    } else if (item.action == "close") {
-      CloseAction(this);
-    } else if (item.action == "open") {
-      const form = new ModalFormData();
-      form.title("§l§f" + SA.Utilities.format.clearColors(item.name) + "§r");
-      form.textField(
-        "Введи значение:",
-        "значение",
-        wo.Q(SA.Utilities.format.clearColors(item.name))
-          ? wo.Q(SA.Utilities.format.clearColors(item.name))
-          : undefined
-      );
-      OpenForm(this, this.player, form, (res) => {
-        if (!res.isCanceled) {
-          wo.set(SA.Utilities.format.clearColors(item.name), res.formValues[0]);
-          SA.Build.chat.broadcast(res.formValues[0]);
-        }
-      });
-    } else if (item.action == "openPlayerMenu") {
-      const form = new ModalFormData();
-      form.title("§l§f" + SA.Utilities.format.clearColors(item.name) + "§r");
-      //form.textField('Введи значение:', 'значение', wo.Q(SA.Utilities.format.clearColors(item.name)) ? wo.Q(SA.Utilities.format.clearColors(item.name)) : undefined)
-      form.dropdown(
-        "Уровень разрешений:",
-        [
-          "Участник",
-          "§9Модер§r (команды, OP)",
-          "§6Админ§r (команды, OP, настройки)",
-        ],
-        SA.Build.entity.getScore(
-          SA.Build.entity.fetch(SA.Utilities.format.clearColors(item.name)),
-          "perm"
-        )
-      );
-      OpenForm(this, this.player, form, (res) => {
-        if (!res.isCanceled) {
-          switch (res.formValues[0]) {
-            case 0:
-              /**
-               * @type {Array<String>}
-               */
-              let list1 = wo.Q("perm:владельцы").split(", ");
-              let list2 = wo.Q("perm:модеры").split(", ");
-              let list11 = [];
-              let list22 = [];
-              list1.forEach((e) => {
-                if (e != SA.Utilities.format.clearColors(item.name))
-                  list11.push(e);
-              });
-              list2.forEach((e) => {
-                if (e != SA.Utilities.format.clearColors(item.name))
-                  list22.push(e);
-              });
-              wo.set("perm:владельцы", list11.join(", "));
-              wo.set("perm:модеры", list22.join(", "));
-              SA.Build.chat.broadcast(
-                `► ${SA.Utilities.format.clearColors(
-                  item.name
-                )} теперь обычный игрок`
-              );
-              break;
-            case 1:
-              let ist1 = wo.Q("perm:владельцы").split(", ");
-              let ist2 = wo.Q("perm:модеры").split(", ");
-              ist2.push(SA.Utilities.format.clearColors(item.name));
-              let ist11 = [];
-              ist1.forEach((e) => {
-                if (e != SA.Utilities.format.clearColors(item.name))
-                  ist11.push(e);
-              });
-              wo.set("perm:владельцы", ist11.join(", "));
-              wo.set("perm:модеры", ist2.join(", "));
-              SA.Build.chat.broadcast(
-                `§9►§f ${SA.Utilities.format.clearColors(
-                  item.name
-                )} назначен §9Модером`
-              );
-              break;
-            case 2:
-              let st1 = wo.Q("perm:владельцы").split(", ");
-
-              st1.push(SA.Utilities.format.clearColors(item.name));
-
-              let st2 = wo.Q("perm:модеры").split(", ");
-
-              let st22 = [];
-
-              st2.forEach((e) => {
-                if (e != SA.Utilities.format.clearColors(item.name))
-                  st22.push(e);
-              });
-
-              wo.set("perm:владельцы", st1.join(", "));
-
-              wo.set("perm:модеры", st22.join(", "));
-
-              SA.Build.chat.broadcast(
-                `§6►§f ${SA.Utilities.format.clearColors(
-                  item.name
-                )} назначен §6Админом`
-              );
-              break;
-          }
-        }
-        SA.Build.chat.broadcast(res.formValues);
-      });
-    } else if (item.action == "set") {
-      SetAction(this, item, slot, itemStack);
-    } else if (item.action.startsWith("change")) {
-      ChangeAction(this, item, slot);
-    } else if (item.action.startsWith("sc:")) {
-      let a = item.action.split(":")[1];
-      if (a == "clear") {
-        light_db.reset();
-        let count = 0;
-        for (let item of this.mapInventory) {
-          if (wo.E(SA.Utilities.format.clearColors(item.item.nameTag)).text) {
-            count++;
-            if (count >= WORLDOPTIONS.length) break;
-            continue;
-          }
-          let nei = {
-            lore: item.item.getLore(),
-            name: item.item.nameTag,
-          };
-          SetAction(
-            this,
-            nei,
-            count,
-            new ItemStack(
-              MinecraftItemTypes.redCandle,
-              item.item.amount,
-              item.item.data
-            )
-          );
-          auxa.createItem(
-            count,
-            "minecraft:red_candle",
-            item.item.amount,
-            item.item.data,
-            "change",
-            item.item.nameTag,
-            item.item.getLore()
-          );
-          count++;
-          if (count >= WORLDOPTIONS.length) break;
-        }
-      }
-      if (a == "clear0") light_db.reset0();
-      SetAction(this, item, slot, itemStack);
-    }
-  }
 }
