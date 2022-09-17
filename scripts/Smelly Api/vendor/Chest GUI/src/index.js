@@ -36,17 +36,6 @@ function identyGui(
   };
 }
 
-/*
-
-identyGui(
-  (player) => ,
-  i,
-  id,
-  page
-);
-
- */
-
 identyGui(GUI_ITEM);
 
 identyGui(
@@ -82,12 +71,11 @@ q.includeLiquidBlocks = false;
 SA.Utilities.time.setTickTimeout(() => {
   world.events.tick.subscribe(() => {
     for (const player of world.getPlayers()) {
-      const heldItem = SA.Models.entity.getHeldItem(player)?.id;
+      const heldItem = SA.Models.entity.getHeldItem(player)?.id, gui = guis[heldItem];
       let activeGui = CURRENT_GUIS[player.name];
 
-      if (heldItem && guis[heldItem]) {
+      if (heldItem && gui) {
         // Gui exist
-        const gui = guis[heldItem];
         if (activeGui && activeGui?.id !== gui?.id) {
           activeGui.killa().then(() => {
             if (gui.permission(player))
@@ -99,16 +87,16 @@ SA.Utilities.time.setTickTimeout(() => {
                 gui.page
               );
           });
-          return;
+          continue;
         }
 
         if (!activeGui && gui.permission(player))
           activeGui = new ChestGUI(player, null, gui.item, gui.id, gui.page);
-        return;
+        continue;
       } else if (activeGui && activeGui?.id !== "chest") {
         // if Gui exist and player dont hold gui item, we need to kill gui
         activeGui.kill();
-        return;
+        continue;
       }
 
       const bl = player.getBlockFromViewVector(q);
@@ -126,10 +114,10 @@ SA.Utilities.time.setTickTimeout(() => {
           //console.warn(page);
           if (!activeGui && PAGES[page])
             activeGui = new ChestGUI(player, null, "other", "chest", page);
-        } else if (activeGui && activeGui.id === "chest") {
+        } else if (activeGui && activeGui?.id === "chest") {
           activeGui.kill();
         }
-      } else if (activeGui && activeGui.id === "chest") {
+      } else if (activeGui && activeGui?.id === "chest") {
         activeGui.kill();
       }
     }

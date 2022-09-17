@@ -1,12 +1,10 @@
-import { world } from "mojang-minecraft";
-import { SA } from "../../index.js";
+import { Player, world } from "mojang-minecraft";
 
 const openRequests = [
   /**
    * {sender: "Steve", target: "Steve", type: "default"}
    */
 ];
-
 export class Request {
   /**
    * Registers a new request

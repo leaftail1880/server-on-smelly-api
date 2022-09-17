@@ -16,7 +16,7 @@ import {
 } from "mojang-minecraft";
 import { po, wo, WorldOption } from "../../app/Models/Options.js";
 import { parseLocationAugs } from "../../app/Utilities/formatter.js";
-import { log, SA } from "../../index.js";
+import { SA } from "../../index.js";
 import { rd } from "../Airdrops/index.js";
 import { quene } from "../Battle Royal/index.js";
 import { stats } from "../Private/private.js";
@@ -303,7 +303,7 @@ export function Atp(
   ignorequene,
   setDefaultInventory
 ) {
-  log(`Atp ${place} ${ignorepvp}`)
+  //log(`Atp ${place} ${ignorepvp}`)
   if (!ignorebr && SA.Build.entity.getTagStartsWith(player, "locktp:"))
     return player.runCommand(
       `tellraw @s {"rawtext":[{"translate":"§c► Сейчас это запрещено (префикс запрета: ${SA.Build.entity.getTagStartsWith(

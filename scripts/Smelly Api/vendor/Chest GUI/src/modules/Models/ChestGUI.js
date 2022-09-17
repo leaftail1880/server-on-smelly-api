@@ -8,6 +8,7 @@ import {
   MinecraftEnchantmentTypes,
   MinecraftItemTypes,
   Player,
+  PlayerInventoryComponentContainer,
   world,
 } from "mojang-minecraft";
 import {
@@ -40,11 +41,10 @@ import {
   Seasec,
 } from "../../../../Server/index.js";
 import { Wallet } from "../../../../Wallet/money.js";
-import { ENTITY_INVENTORY, GUI_ITEM, GUI_ITEM2 } from "../../config.js";
+import { ENTITY_INVENTORY, GUI_ITEM } from "../../config.js";
 import {
   auxa,
   DEFAULT_STATIC_PAGE_ID,
-  DEFAULT_STATIC_PAGE_ID2,
   pls,
   предметы,
 } from "../../static_pages.js";
@@ -52,7 +52,6 @@ import {
   ChangeAction,
   ChangePAction,
   CloseAction,
-  CommandAction,
   GiveAction,
   OpenForm,
   PageAction,
@@ -595,8 +594,7 @@ export const ACTIONS1 = {
             let st22 = [];
 
             st2.forEach((e) => {
-              if (e != SA.Utilities.format.clearColors(item.name))
-                st22.push(e);
+              if (e != SA.Utilities.format.clearColors(item.name)) st22.push(e);
             });
 
             wo.set("perm:владельцы", st1.join(", "));
@@ -806,8 +804,6 @@ export const ACTIONS1 = {
   },
 };
 
-
-
 const STARTACTIONS1 = {
   "": (his, item) => {
     let a = item.action.split(":")[1];
@@ -922,6 +918,13 @@ const STARTACTIONS1 = {
 
 export class ChestGUI {
   /**
+   * Gets a inventory's coresponding gui
+   * @param {Entity | null} entity entity to get not PLAYER
+   */
+  static getEntitysGuiInstance(entity) {
+    return Object.values(CURRENT_GUIS).find((gui) => gui.entity == entity);
+  }
+  /**
    * Finds and returns a slot change in a inventory
    * @param {Array<MappedInventoryItem>} oldInv
    * @param {Array<MappedInventoryItem>} newInv
@@ -968,6 +971,7 @@ export class ChestGUI {
      * @type {Page}
      */
     this.page = null;
+
     if (!this.entity) this.summon();
 
     this.events = {
@@ -998,6 +1002,7 @@ export class ChestGUI {
 
         if (!this.player.hasTag(`has_container_open`)) return;
         if (!this.previousMap) return;
+
         const change = ChestGUI.getSlotChange(
           this.previousMap,
           this.mapInventory
@@ -1205,53 +1210,90 @@ export class ChestGUI {
         item
       );
     } else {
-      co("On page item id: " + item.type);
       // item was taken from this page
-      try {
-        // console.warn(`itemStack: ${change.item.id}`);
-        // change.item.nameTag = "boiiiiii";
-        this.player.runCommand(
-          `clear @s ${item.type} ${item.data} ${ex ? ex : item.amount}`
-        );
-      } catch (error) {
-        // the item couldnt be cleared that means
-        // they now have a item witch is really BAD
-        const q = new EntityQueryOptions();
-        (q.type = "minecraft:item"), (q.location = this.player.location);
-        q.maxDistance = 2;
-        [...this.player.dimension.getEntities(q)].forEach((e) => e.kill());
-      }
+      const clearItem = Object.assign(item)
+      if (ex) clearItem.amount = ex
+      clearPlayersPointer(this.player, clearItem)
 
+      if (!item.item && !getItemAtSlot(this.entity, change.slot)) return;
+      
       // Действия
-
-      let act = (his, item) =>
+      const act = (_his, item) =>
           SA.Build.chat.broadcast(
             "§c[ChestGUI] §fUnknown action: §r" + item.action
           ),
-        ks = Object.keys(STARTACTIONS1),
-        res;
-      //const res = ks.find((e) => item.action.startsWith(e));
-      for (const e of ks) {
-        const q = item.action.startsWith(e);
-        if (!q) continue;
-        res = e;
-      }
+        res = Object.keys(STARTACTIONS1).find((e) => item.action.startsWith(e));
+
       if (ACTIONS1[item.action]) act = ACTIONS1[item.action];
       if (res) act = STARTACTIONS1[res];
       act(this, item, change);
     }
 
     this.previousMap = this.mapInventory;
-    co("}");
   }
+}
 
+/**
+ * Clears the player of a item in there pointer slot
+ * @param {Player} player
+ * @param {Item} ItemToClear
+ */
+export async function clearPlayersPointer(player, ItemToClear) {
+  try {
+    /**
+     * @type {PlayerInventoryComponentContainer}
+     */
+    const inventory = player.getComponent("minecraft:inventory").container;
+    let itemsToLoad = [];
+    for (let i = 0; i < inventory.size; i++) {
+      const item = inventory.getItem(i);
+      if (!item) continue;
+      if (item?.id == ItemToClear?.id) {
+        itemsToLoad.push({ slot: i, item: item });
+        inventory.setItem;
+        if (i < 9) {
+          player.runCommand(`replaceitem entity @s slot.hotbar ${i} air`);
+        } else {
+          player.runCommand(
+            `replaceitem entity @s slot.inventory ${i - 9} air`
+          );
+        }
+      }
+    }
+    try {
+      player.runCommand(
+        `clear @s ${ItemToClear?.id} ${ItemToClear.data} ${ItemToClear.amount}`
+      );
+    } catch (e) {
+      // the item couldnt be cleared that means
+      // they now have a item witch is really BAD
+      [
+        ...player.dimension.getEntities({
+          type: "minecraft:item",
+          location: player.location,
+          maxDistance: 2,
+          closest: 1,
+        }),
+      ][0].kill();
+    }
+    for (const item of itemsToLoad) {
+      inventory.setItem(item.slot, item.item);
+    }
+  } catch (error) {
+    console.warn(error + error.stack);
+  }
+}
+
+/**
+ * Gets a item at slot
+ * @param {Entity} entity entity to grab from
+ * @param {number} slot slot number to get
+ * @returns {ItemStack | null}
+ */
+ export function getItemAtSlot(entity, slot) {
   /**
-   * Runs a item action when its grabbed out of a container
-   * @param {string} item item that was grabbed
-   * @param {number} slot slot the item was grabbed from
-   * @param {ItemStack} itemStack the itemStack that was grabbed
+   * @type {InventoryComponentContainer}
    */
-  /*runItemAction(item, slot, itemStack) {
-
-  }*/
+  const inventory = entity.getComponent("minecraft:inventory").container;
+  return inventory.getItem(slot);
 }

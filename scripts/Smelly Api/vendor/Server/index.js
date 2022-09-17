@@ -26,7 +26,7 @@ import { po, wo, wow } from "../../app/Models/Options.js";
  *========================**/
 import { P } from "../../config/particles.js";
 import { S } from "../../config/sounds.js";
-import { log, SA } from "../../index.js";
+import { SA } from "../../index.js";
 
 /**======================
  **       PLUGINS
