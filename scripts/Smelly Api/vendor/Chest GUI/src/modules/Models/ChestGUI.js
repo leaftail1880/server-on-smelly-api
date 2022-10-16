@@ -2,7 +2,6 @@ import {
   Enchantment,
   EnchantmentList,
   Entity,
-  EntityQueryOptions,
   InventoryComponentContainer,
   ItemStack,
   MinecraftEnchantmentTypes,
@@ -79,7 +78,7 @@ class DefaultFill {
     for (let i = 0; i < container.size; i++) {
       const item = page.items[i];
       if (!item || !item.type) {
-        container.setItem(i, new ItemStack(MinecraftItemTypes.air));
+        entity.runCommand(`replaceitem entity @s slot.inventory ${i} air`);
         continue;
       }
       entity.runCommand(
@@ -1211,25 +1210,42 @@ export class ChestGUI {
       );
     } else {
       // item was taken from this page
-      const clearItem = Object.assign(item)
-      if (ex) clearItem.amount = ex
-      clearPlayersPointer(this.player, clearItem)
+      const clearItem = Object.assign(item);
+      if (ex) clearItem.amount = ex;
+      clearPlayersPointer(this.player, clearItem);
 
-      if (!item.item && !getItemAtSlot(this.entity, change.slot)) return;
-      
+      if (!change.item && !getItemAtSlot(this.entity, change.slot)) return;
+
       // Действия
-      const act = (_his, item) =>
-          SA.Build.chat.broadcast(
-            "§c[ChestGUI] §fUnknown action: §r" + item.action
-          ),
-        res = Object.keys(STARTACTIONS1).find((e) => item.action.startsWith(e));
+      let act = (_his, item) =>
+        SA.Build.chat.broadcast(
+          "§c[ChestGUI] §fUnknown action: §r" + item.action
+        );
 
       if (ACTIONS1[item.action]) act = ACTIONS1[item.action];
-      if (res) act = STARTACTIONS1[res];
-      act(this, item, change);
+      for (const key of Object.keys(STARTACTIONS1)) {
+        if (!item.action.startsWith(key)) continue;
+        act = STARTACTIONS1[key];
+      }
+
+      safeRun(`ItemAction{${item.action}}`, () => act(this, item, change));
     }
 
     this.previousMap = this.mapInventory;
+  }
+}
+
+export function safeRun(runnerName, callback) {
+  try {
+    const result = callback();
+    if (result?.catch)
+      result.catch((e) => {
+        console.warn(`Promise ${runnerName} error: ${e.stack}`);
+      });
+    return true;
+  } catch (error) {
+    console.warn(`${runnerName} error: ${e.stack}`);
+    return false;
   }
 }
 
@@ -1262,7 +1278,9 @@ export async function clearPlayersPointer(player, ItemToClear) {
     }
     try {
       player.runCommand(
-        `clear @s ${ItemToClear?.id} ${ItemToClear.data} ${ItemToClear.amount}`
+        `clear @s ${ItemToClear?.id ?? ItemToClear?.type} ${ItemToClear.data} ${
+          ItemToClear.amount
+        }`
       );
     } catch (e) {
       // the item couldnt be cleared that means
@@ -1274,7 +1292,7 @@ export async function clearPlayersPointer(player, ItemToClear) {
           maxDistance: 2,
           closest: 1,
         }),
-      ][0].kill();
+      ][0]?.kill();
     }
     for (const item of itemsToLoad) {
       inventory.setItem(item.slot, item.item);
@@ -1290,7 +1308,7 @@ export async function clearPlayersPointer(player, ItemToClear) {
  * @param {number} slot slot number to get
  * @returns {ItemStack | null}
  */
- export function getItemAtSlot(entity, slot) {
+export function getItemAtSlot(entity, slot) {
   /**
    * @type {InventoryComponentContainer}
    */

@@ -1,7 +1,6 @@
 import {
   BlockInventoryComponentContainer,
   BlockLocation,
-  EntityQueryOptions,
   ItemStack,
   Location,
   MinecraftBlockTypes,
@@ -9,6 +8,7 @@ import {
   Player,
   world,
 } from "mojang-minecraft";
+import { EntityQueryOptions } from "../../app/Models/EntityQueryOptions.js";
 import { wo } from "../../app/Models/Options.js";
 import { SA } from "../../index.js";
 import { rd } from "../Airdrops/index.js";
@@ -16,7 +16,6 @@ import { Atp } from "../Portals/index.js";
 import { LootChest } from "./loot.js";
 import { rtp } from "./rtp.js";
 import { zone } from "./zone.js";
-
 class BattleRoyal {
   constructor() {
     /**

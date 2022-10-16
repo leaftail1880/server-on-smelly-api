@@ -1,7 +1,6 @@
 import {
   BlockLocation,
   BlockRaycastOptions,
-  EntityQueryOptions,
   ExplosionOptions,
   Items,
   ItemStack,
@@ -12,13 +11,12 @@ import {
   SoundOptions,
   world,
 } from "mojang-minecraft";
+import { EntityQueryOptions } from "../../app/Models/EntityQueryOptions.js";
 import { wow } from "../../app/Models/Options.js";
 
 /**======================
  **       ARRAYS
  *========================**/
-import { P } from "../../config/particles.js";
-import { S } from "../../config/sounds.js";
 import { SA } from "../../index.js";
 
 /**============================================

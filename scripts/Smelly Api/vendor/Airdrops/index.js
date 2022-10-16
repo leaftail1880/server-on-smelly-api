@@ -10,8 +10,8 @@ import {
   BlockLocation,
   Location,
   MinecraftEffectTypes,
-  EntityQueryOptions,
 } from "mojang-minecraft";
+import { EntityQueryOptions } from "../../app/Models/EntityQueryOptions.js";
 import { SA } from "../../index.js";
 
 export function rd(max, min = 0, msg) {

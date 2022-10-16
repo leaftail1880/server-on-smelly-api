@@ -1,13 +1,13 @@
 import {
   BlockLocation,
   Entity,
-  EntityQueryOptions,
   InventoryComponentContainer,
   ItemStack,
   Location,
   MinecraftItemTypes,
   world,
 } from "mojang-minecraft";
+import { EntityQueryOptions } from "../../app/Models/EntityQueryOptions.js";
 
 /**
  * Minecraft Bedrock Item Database

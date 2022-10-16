@@ -1,6 +1,7 @@
 import {
   DynamicPropertiesDefinition,
   EntityTypes,
+  system,
   world,
 } from "mojang-minecraft";
 import { Command } from "./app/Contracts/Commands/Command.js";
@@ -130,21 +131,20 @@ world.events.worldInitialize.subscribe(({ propertyRegistry }) => {
   import("./vendor/autoload.js").then(() => {
     // SA.Build.chat.broadcast("§9├ §f"+plgs.join(', '));
     SA.Build.chat.broadcast("§9└ §fDone.");
+    console.info('Done.')
     for (const p of world.getPlayers())
       p.runCommand("playsound beacon.activate @s ~~~ 10 1.3");
     world.events.beforeChat.unsubscribe(a);
   });
 });
 
-try {
-  world.events.beforeWatchdogTerminate.subscribe((data) => {
-    data.cancel = true;
-    SA.Build.chat.broadcast("емае скрипт крашнулся");
-  });
-} catch (error) {}
+system.events.beforeWatchdogTerminate.subscribe((data) => {
+  data.cancel = true;
+  SA.Build.chat.broadcast("емае скрипт крашнулся");
+});
 
 export function log(msg) {
-  const d = new Date()
-  d.setHours(d.getHours()+3)
-  SA.Build.chat.broadcast(`§8[log][${d.toLocaleTimeString('ru-RU')}]§7 ${msg}`)
+  const d = new Date();
+  d.setHours(d.getHours() + 3);
+  SA.Build.chat.broadcast(`§8[log][${d.toLocaleTimeString("ru-RU")}]§7 ${msg}`);
 }

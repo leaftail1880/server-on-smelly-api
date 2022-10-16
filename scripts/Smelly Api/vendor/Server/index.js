@@ -2,7 +2,6 @@ import {
   BlockLocation,
   BlockRaycastOptions,
   EnchantmentList,
-  EntityQueryOptions,
   ExplosionOptions,
   Items,
   ItemStack,
@@ -42,6 +41,7 @@ import "../Private/private.js";
 import { Atp } from "../Portals/index.js";
 import { stringifyEx } from "../../app/Utilities/formatter.js";
 import { stats } from "../Private/private.js";
+import { EntityQueryOptions } from "../../app/Models/EntityQueryOptions.js";
 /*------------------------------------------ КОНЕЦ ИМПОРТОВ ------------------------------------------*/
 
 /**

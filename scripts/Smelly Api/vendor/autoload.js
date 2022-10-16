@@ -27,7 +27,7 @@ const Plugins = [
   "Private/private.js",
 ];
 if (wo.QQ("server:spawn")) Plugins.push("Portals/index.js");
-if (wo.QQ("import:wb")) Plugins.push("World Edit/WORLDindex.js");
+if (!wo.QQ("import:cmd:wb:disable")) Plugins.push("World Edit/WORLDindex.js");
 if (wo.QQ("import:br")) Plugins.push("Battle Royal/index.js");
 if (Items.get("addon:akm")) Plugins.push("Guns/index.js");
 
@@ -41,5 +41,3 @@ for (const plugin of Plugins) {
       console.warn(`§c[E] §f${plugin}: ` + error + error.stack);
     });
 }
-
-export const plgs = Plugins.map(e=>e.split('/')[0])

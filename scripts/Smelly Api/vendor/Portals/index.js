@@ -4,7 +4,6 @@ import {
   BlockLocation,
   InventoryComponentContainer,
   Player,
-  EntityQueryOptions,
   EntityQueryScoreOptions,
   MinecraftEffectTypes,
   MinecraftBlockTypes,
@@ -14,6 +13,7 @@ import {
   Vector,
   BlockType,
 } from "mojang-minecraft";
+import { EntityQueryOptions } from "../../app/Models/EntityQueryOptions.js";
 import { po, wo, WorldOption } from "../../app/Models/Options.js";
 import { parseLocationAugs } from "../../app/Utilities/formatter.js";
 import { SA } from "../../index.js";

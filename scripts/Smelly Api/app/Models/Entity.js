@@ -1,15 +1,17 @@
 import {
   world,
   BlockLocation,
-  EntityQueryOptions,
   Entity,
   Location,
   ItemStack,
   Player,
   PlayerInventoryComponentContainer,
+  EntityQueryScoreOptions,
 } from "mojang-minecraft";
 import { SHAPES } from "../../vendor/World Edit/modules/definitions/shapes.js";
+import { EntityQueryOptions } from "./EntityQueryOptions.js";
 
+EntityQueryScoreOptions
 export function getPlace(place, text) {
   //Place, prefix symbol color, rotation
   let P, C, rot;
